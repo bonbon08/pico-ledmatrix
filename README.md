@@ -70,6 +70,8 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/gameoflife.py` | Conways Game of Life mit Überblenden und Farbe nach Zellalter |
 | `demos/feuer.py` | Lagerfeuer mit Flammenzungen, Wind und aufsteigenden Funken |
 | `demos/uhr.py` | Uhr: oben Stunden, unten Minuten, Sekundenring am Rand (60 Pixel) |
+| `demos/matrixcode.py` | Grüner Matrix-Code-Regen mit flackernden Zeichen ([Vorschau](bilder/matrixcode.png)) |
+| `demos/erdblock.py` | Rotierender 3D-Erdblock im Minecraft-Stil, optional als Grasblock ([Erde](bilder/erdblock.png), [Gras](bilder/grasblock.png)) |
 | `demos/feuerwerk.py` | Feuerwerk mit Kugeln, Ringen, Goldregen und Glitzer, mit Nachleuchten ([Vorschau](bilder/feuerwerk.png)) |
 | `demos/aquarium.py` | Aquarium mit Fischen, Seegras, Schatztruhe und Luftblasen ([Vorschau](bilder/aquarium.png)) |
 | `demos/sternhimmel.py` | Funkelnde Sterne, Mondsichel und gelegentliche Sternschnuppen ([Vorschau](bilder/sternhimmel.png)) |
@@ -131,6 +133,8 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Helligkeit:** `MAX` in `matrix.py`
 - **Helligkeitsausgleich je Matrix und Farbe:** `GAIN` in `matrix.py`. Matrix 1 hat andere LEDs: Rot und Grün leuchten doppelt so hell, Blau etwa 1,45-mal. Sie läuft deshalb mit (0,5; 0,5; 0,69). Die Werte wurden per Auge mit einfarbigen Testbildern abgeglichen.
 - **Regenbogen:** Die Geschwindigkeit stellt man über `off + 12` und `time.sleep_ms(20)` ein. Ein größerer Faktor in `int(d * 48)` ergibt schmalere Ringe.
+- **Matrix-Code:** `DROPS` ist die Anzahl der Spuren pro Spalte, `DECAY` die Schweiflänge, `GLYPH_FLIP` wie oft Zeichen wechseln.
+- **Erdblock:** Mit `GRASS = True` wird daraus ein Grasblock. `SPIN` ist das Drehtempo, `TILT` die Neigung (negativ = von oben gesehen), `ZOOM` die Größe (kleiner = größer).
 - **Feuerwerk:** `LAUNCH` ist die Häufigkeit der Raketen, `FINALE` die Häufigkeit eines Finales mit 4 Raketen. `TRAIL` bestimmt die Länge der Leuchtspuren. `MAX_SPARKS` begrenzt die Funken, damit der Pico flüssig bleibt.
 - **Aquarium:** `FISH` ist die Anzahl der Fische (Farben in `FISH_COLS`), `BUBBLE_RATE` die Häufigkeit der Luftblasen. Die Fischform steht in `FISH_ART`, das Seegras in `WEEDS` als (x, Höhe).
 - **Sternhimmel:** `STARS` ist die Anzahl der Sterne, `SHOOT` die Häufigkeit der Sternschnuppen (0,006 = etwa alle 7 Sekunden). Mit `MOON` lässt sich der Mond ein- und ausschalten.
