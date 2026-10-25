@@ -70,6 +70,10 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/gameoflife.py` | Conways Game of Life mit Überblenden und Farbe nach Zellalter |
 | `demos/feuer.py` | Lagerfeuer mit Flammenzungen, Wind und aufsteigenden Funken |
 | `demos/uhr.py` | Uhr: oben Stunden, unten Minuten, Sekundenring am Rand (60 Pixel) |
+| `demos/shooter.py` | Ego-Shooter im 90er-Stil, der sich selbst spielt: Raycasting, eigenes Labyrinth, Schleimmonster ([Vorschau](bilder/shooter.png)) |
+| `demos/visualizer.py` | Sound-Visualizer: 16 Frequenzbalken vom PC-Ton, braucht `tools/visualizer.py` auf dem PC |
+| `demos/roboter.py` | Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft ([Vorschau](bilder/roboter.png)) |
+| `demos/kopfstein.py` | Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt ([Vorschau](bilder/kopfstein.png)) |
 | `demos/matrixcode.py` | Grüner Matrix-Code-Regen mit flackernden Zeichen ([Vorschau](bilder/matrixcode.png)) |
 | `demos/erdblock.py` | Rotierender 3D-Erdblock im Minecraft-Stil, optional als Grasblock ([Erde](bilder/erdblock.png), [Gras](bilder/grasblock.png)) |
 | `demos/feuerwerk.py` | Feuerwerk mit Kugeln, Ringen, Goldregen und Glitzer, mit Nachleuchten ([Vorschau](bilder/feuerwerk.png)) |
@@ -77,6 +81,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/sternhimmel.py` | Funkelnde Sterne, Mondsichel und gelegentliche Sternschnuppen ([Vorschau](bilder/sternhimmel.png)) |
 | `demos/kirschbaum.py` | Blauer Kirschblütenbaum bei Nacht mit fallenden Blütenblättern ([Vorschau](bilder/kirschbaum.png)) |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
+| `tools/visualizer.py` | PC-Seite des Sound-Visualizers |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
 
 ## Installation
@@ -99,6 +104,19 @@ Deshalb die Zeit beim Hochladen vom PC übernehmen und `main.py` ohne Reset star
 ```bash
 uvx mpremote cp demos/uhr.py :main.py + rtc --set + exec --no-follow "import main"
 ```
+
+### Sound-Visualizer
+
+Der PC schneidet den Ton mit, der gerade abgespielt wird (PipeWire/PulseAudio, Monitor des Standard-Ausgangs). Daraus berechnet er 16 logarithmisch verteilte Frequenzbänder von 40 Hz bis 16 kHz und schickt sie etwa 40-mal pro Sekunde per USB an den Pico.
+Die Lautstärke wird automatisch nachgeregelt. Kommen 2 Sekunden lang keine Daten an, zeigt der Pico eine blaue Warte-Welle.
+
+```bash
+uvx mpremote cp demos/visualizer.py :main.py + reset
+python tools/visualizer.py          # benötigt parec, numpy, pyserial; Strg+C beendet
+```
+
+Solange `tools/visualizer.py` läuft, belegt es den USB-Port. `mpremote` funktioniert dann nicht.
+Übertragen werden nur druckbare Zeichen (`'0'` + Pegel 0–64 je Band, dann ein Zeilenende). So landet nie versehentlich ein Strg+C beim Pico.
 
 ## Eigene Demos
 
@@ -133,6 +151,9 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Helligkeit:** `MAX` in `matrix.py`
 - **Helligkeitsausgleich je Matrix und Farbe:** `GAIN` in `matrix.py`. Matrix 1 hat andere LEDs: Rot und Grün leuchten doppelt so hell, Blau etwa 1,45-mal. Sie läuft deshalb mit (0,5; 0,5; 0,69). Die Werte wurden per Auge mit einfarbigen Testbildern abgeglichen.
 - **Regenbogen:** Die Geschwindigkeit stellt man über `off + 12` und `time.sleep_ms(20)` ein. Ein größerer Faktor in `int(d * 48)` ergibt schmalere Ringe.
+- **Shooter:** Das Labyrinth steht in `MAP` (`#` Stein, `B` Ziegel, `T` Technik, `.` frei). `ENEMIES` ist die Anzahl der Gegner, `SHOOT_DIST` der Abstand, ab dem geschossen wird. `MOVE` und `TURN` bestimmen das Tempo.
+- **Roboter:** Farben stehen oben in der Datei. Welche Zustände wie oft vorkommen, regelt `next_state()`.
+- **Pflasterstein:** `SPIN` ist das Drehtempo um die drei Achsen, `STONES` das Steinmuster (8×8).
 - **Matrix-Code:** `DROPS` ist die Anzahl der Spuren pro Spalte, `DECAY` die Schweiflänge, `GLYPH_FLIP` wie oft Zeichen wechseln.
 - **Erdblock:** Mit `GRASS = True` wird daraus ein Grasblock. `SPIN` ist das Drehtempo, `TILT` die Neigung (negativ = von oben gesehen), `ZOOM` die Größe (kleiner = größer).
 - **Feuerwerk:** `LAUNCH` ist die Häufigkeit der Raketen, `FINALE` die Häufigkeit eines Finales mit 4 Raketen. `TRAIL` bestimmt die Länge der Leuchtspuren. `MAX_SPARKS` begrenzt die Funken, damit der Pico flüssig bleibt.
