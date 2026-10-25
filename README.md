@@ -93,7 +93,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 ## Anpassen
 
 - **Helligkeit:** `MAX` in `main.py`
-- **Helligkeitsausgleich je Matrix:** `GAIN` in `main.py`. Matrix 1 ist von Haus aus heller und läuft deshalb mit 0,63.
+- **Helligkeitsausgleich je Matrix und Farbe:** `GAIN` in `main.py`. Matrix 1 hat andere LEDs: Rot und Grün leuchten doppelt so hell, Blau etwa 1,45-mal. Sie läuft deshalb mit (0,5; 0,5; 0,69). Die Werte wurden per Auge mit einfarbigen Testbildern abgeglichen.
 - **Geschwindigkeit:** `off + 12` (Schrittweite) und `time.sleep_ms(20)` (Pause zwischen den Bildern)
 - **Ringbreite:** Faktor in `int(d * 48)`. Ein größerer Wert ergibt schmalere Ringe.
 
