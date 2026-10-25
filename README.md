@@ -84,7 +84,36 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/kirschbaum.py` | Blauer Kirschblütenbaum bei Nacht mit fallenden Blütenblättern ([Vorschau](bilder/kirschbaum.png)) |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
 | `tools/visualizer.py` | PC-Seite des Sound-Visualizers |
+| `tools/gui.py` | GUI zum Auswählen und Hochladen von Demos und eigenen Bildern/GIFs |
+| `demos/_bild.py` | Player für eigene Bilder/GIFs (lädt die GUI zusammen mit `bild.bin` hoch) |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
+
+## GUI
+
+```bash
+python tools/gui.py
+```
+
+Benötigt werden `tkinter`, Pillow und pyserial, für den Sound-Visualizer zusätzlich numpy und `parec`. `mpremote` wird verwendet, wenn es installiert ist, sonst über `uvx mpremote` gestartet.
+
+- **Demos:** Links eine Demo auswählen, rechts erscheinen Vorschau und Beschreibung. „Auf die Matrix laden“ oder ein Doppelklick lädt sie hoch, `matrix.py` wird dabei immer mit hochgeladen.
+  - Bei der **Uhr** übernimmt die GUI die PC-Zeit und startet ohne Reset.
+  - Beim **Sound-Visualizer** startet die GUI anschließend `tools/visualizer.py`. „Visualizer stoppen“ beendet es, ebenso das nächste Hochladen.
+- **Eigenes Bild / GIF:** PNG, GIF, JPG, BMP oder WebP öffnen. Die Vorschau zeigt das Ergebnis in 16×16, GIFs animiert.
+  - *Einpassen* lässt schwarze Ränder, *Zuschneiden* füllt die ganze Fläche, *Strecken* verzerrt.
+  - *Helligkeit anheben* streckt alle Bilder mit demselben Faktor so, dass der hellste Wert 255 ist. Dunkle Bilder sind auf der gedimmten Matrix sonst kaum zu sehen.
+  - *Scharf skalieren* ist für Pixel-Art gedacht und wird bei Bildern bis 32 Pixel automatisch eingeschaltet.
+  - *GIF-Tempo* von 0,25× bis 3×.
+  - Hochgeladen werden höchstens 400 Bilder, das sind etwa 300 KB im Flash.
+- **Matrix ausschalten:** LEDs aus und `main.py` löschen. Danach startet beim Einstecken nichts mehr.
+
+Neue Demos in `demos/` erscheinen automatisch in der Liste. Der Name kommt aus `NAMES` in `tools/gui.py`, sonst aus dem Kopfkommentar der Demo (`# Demo: Name. Beschreibung`). Das Vorschaubild ist `bilder/<demo>.png`.
+Dateien, die mit `_` beginnen, sind keine Demos.
+
+### Format von `bild.bin`
+
+`b"LEDB"`, Anzahl Bilder (uint16, little endian), dann je Bild: Dauer in ms (uint16) und 768 Byte RGB, zeilenweise von oben links.
+Der Player liest die Bilder einzeln aus dem Flash. Deshalb müssen auch lange GIFs nicht in den Arbeitsspeicher.
 
 ## Installation
 

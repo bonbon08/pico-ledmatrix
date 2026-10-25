@@ -40,7 +40,7 @@ def main():
     hop = RATE // args.fps
     rec = subprocess.Popen(
         ["parec", "-d", args.quelle, "--format=s16le", f"--rate={RATE}", "--channels=1",
-         "--latency-msec=20"], stdout=subprocess.PIPE)
+         "--latency-msec=20"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     # logarithmisch verteilte Baender, jedes mindestens ein FFT-Bin breit
     freqs = np.fft.rfftfreq(FFT, 1 / RATE)
