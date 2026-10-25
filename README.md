@@ -66,6 +66,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `matrix.py` | Gemeinsame Bibliothek: Koordinaten, Helligkeit, Helligkeitsausgleich, Strombremse |
 | `demos/regenbogen.py` | Regenbogen-Ringe von der Mitte nach außen |
 | `demos/tetris.py` | Zufällige Tetris-Steine fallen und stapeln sich, volle Reihen verschwinden |
+| `demos/snake.py` | Snake, die von alleine spielt und meist das ganze Feld füllt |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
 
@@ -114,6 +115,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Helligkeit:** `MAX` in `matrix.py`
 - **Helligkeitsausgleich je Matrix und Farbe:** `GAIN` in `matrix.py`. Matrix 1 hat andere LEDs: Rot und Grün leuchten doppelt so hell, Blau etwa 1,45-mal. Sie läuft deshalb mit (0,5; 0,5; 0,69). Die Werte wurden per Auge mit einfarbigen Testbildern abgeglichen.
 - **Regenbogen:** Die Geschwindigkeit stellt man über `off + 12` und `time.sleep_ms(20)` ein. Ein größerer Faktor in `int(d * 48)` ergibt schmalere Ringe.
+- **Snake:** `STEP_MS` ist die Zeit pro Schritt. Eine komplette Runde dauert bei 80 ms etwa 15 Minuten.
 - **Tetris:** `FALL_MS` ist die Fallgeschwindigkeit. `SMART` ist der Anteil der Steine, die gut gelegt werden. Je höher der Wert, desto mehr Reihen werden voll.
 
 ## Fehlersuche
