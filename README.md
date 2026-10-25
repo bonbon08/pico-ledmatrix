@@ -70,6 +70,8 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/gameoflife.py` | Conways Game of Life mit Überblenden und Farbe nach Zellalter |
 | `demos/feuer.py` | Lagerfeuer mit Flammenzungen, Wind und aufsteigenden Funken |
 | `demos/uhr.py` | Uhr: oben Stunden, unten Minuten, Sekundenring am Rand (60 Pixel) |
+| `demos/rennen_oben.py` | Autorennen von oben: 4 Autos auf einer 64×64-Strecke, Kamera fährt mit ([Vorschau](bilder/rennen_oben.png)) |
+| `demos/rennen_hinten.py` | Autorennen von hinten (Pseudo-3D) mit Kurven, Sonnenuntergang, Palmen und Gegenverkehr ([Vorschau](bilder/rennen_hinten.png)) |
 | `demos/shooter.py` | Ego-Shooter im 90er-Stil, der sich selbst spielt: Raycasting, eigenes Labyrinth, Schleimmonster ([Vorschau](bilder/shooter.png)) |
 | `demos/visualizer.py` | Sound-Visualizer: 16 Frequenzbalken vom PC-Ton, braucht `tools/visualizer.py` auf dem PC |
 | `demos/roboter.py` | Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft ([Vorschau](bilder/roboter.png)) |
@@ -151,6 +153,8 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Helligkeit:** `MAX` in `matrix.py`
 - **Helligkeitsausgleich je Matrix und Farbe:** `GAIN` in `matrix.py`. Matrix 1 hat andere LEDs: Rot und Grün leuchten doppelt so hell, Blau etwa 1,45-mal. Sie läuft deshalb mit (0,5; 0,5; 0,69). Die Werte wurden per Auge mit einfarbigen Testbildern abgeglichen.
 - **Regenbogen:** Die Geschwindigkeit stellt man über `off + 12` und `time.sleep_ms(20)` ein. Ein größerer Faktor in `int(d * 48)` ergibt schmalere Ringe.
+- **Rennen von oben:** Die Strecke steht in `POINTS` als Eckpunkte einer geschlossenen Runde (Welt 64×64). `ROAD` und `CURB` sind die halbe Straßenbreite und die Breite der Randsteine. Die Autofarben stehen in `CARS`. Beim Start wird die Strecke etwa 4 Sekunden lang berechnet, solange ist ein Ladebalken zu sehen.
+- **Rennen von hinten:** Die Strecke steht in `TRACK` als Abschnitte (Länge, Krümmung; negativ = links). `SPEED` ist das Tempo, `PX` die Straßenbreite.
 - **Shooter:** Das Labyrinth steht in `MAP` (`#` Stein, `B` Ziegel, `T` Technik, `.` frei). `ENEMIES` ist die Anzahl der Gegner, `SHOOT_DIST` der Abstand, ab dem geschossen wird. `MOVE` und `TURN` bestimmen das Tempo.
 - **Roboter:** Farben stehen oben in der Datei. Welche Zustände wie oft vorkommen, regelt `next_state()`.
 - **Pflasterstein:** `SPIN` ist das Drehtempo um die drei Achsen, `STONES` das Steinmuster (8×8).
