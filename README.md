@@ -54,6 +54,7 @@ Grob geschätzt liegt die Gesamtaufnahme bei ca. 200–300 mA. Davon geht schon 
 |---|---|
 | `main.py` | Animation (Regenbogen-Ringe von der Mitte nach außen). Startet automatisch beim Einschalten. |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
+| `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
 
 ## Installation
 
@@ -91,3 +92,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **LEDs bleiben dunkel oder flackern:** Der 3,3-V-Datenpegel des Pico reicht bei 5-V-LEDs manchmal nicht ganz. Hilfreich sind dann ein Widerstand von 330 Ω in der Datenleitung, eine kurze Leitung oder ein Pegelwandler (z. B. 74AHCT125). Außerdem prüfen, ob GND gemeinsam verbunden ist.
 - **Farben vertauscht:** Andere LED-Typen verwenden eine andere Kanalreihenfolge (z. B. RGB statt GRB).
 - **Bild verdreht oder gespiegelt:** Mit dem Testbild prüfen und `xy()` anpassen.
+
+## Gehäuse
+
+Ein Gehäuse zum 3D-Drucken (Rahmen mit Pixelraster und Diffusor, Deckel mit Pico-Halter) liegt in [`gehaeuse/`](gehaeuse/README.md).
