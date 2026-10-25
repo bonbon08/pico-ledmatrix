@@ -41,11 +41,20 @@ def xy(x, y):
 ## Stromverbrauch und Helligkeit
 
 Bei voller Helligkeit zieht eine WS2812B in Weiß bis zu ca. 60 mA. 256 LEDs kämen damit auf über 15 A, viel zu viel für USB (500 mA).
-Deshalb begrenzt `MAX` in `main.py` jeden Farbkanal auf **4 von 255**, also etwa 1,5 %. Außerdem leuchten nie alle drei Kanäle gleichzeitig.
+Deshalb begrenzt `MAX` in `main.py` jeden Farbkanal auf **10 von 255**, also etwa 4 %. Außerdem leuchten nie alle drei Kanäle gleichzeitig, und zusammen ergeben sie höchstens `MAX`.
 
-Grob geschätzt liegt die Gesamtaufnahme bei ca. 200–300 mA. Davon geht schon ein großer Teil auf den Ruhestrom der LEDs (etwa 0,5–1 mA pro LED, auch wenn sie aus sind).
+Grobe Schätzung:
 
-> Ohne externes 5-V-Netzteil `MAX` nicht über ca. 8 stellen.
+| Verbraucher | Strom |
+|---|---|
+| Ruhestrom der LEDs (0,6–1 mA pro LED, auch wenn sie aus sind) | 150–250 mA |
+| Leuchten bei `MAX = 10` (ca. 0,8 mA pro LED) | ca. 200 mA |
+| Pico | ca. 25 mA |
+| **Summe** | **ca. 375–475 mA** |
+
+Das liegt knapp unter den 500 mA, die ein USB-2.0-Port liefert.
+
+> Ohne externes 5-V-Netzteil `MAX` nicht weiter erhöhen.
 > Mit Netzteil die 5 V direkt an die Matrizen führen und GND mit dem Pico verbinden.
 
 ## Dateien

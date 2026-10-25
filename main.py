@@ -4,7 +4,7 @@ import machine, neopixel, time, math
 
 PIN = 22
 W = H = 16
-MAX = 4  # max. Helligkeit pro Kanal (0-255) -> geringer Strom fuer USB/Pico
+MAX = 10  # max. Helligkeit pro Kanal (0-255) -> ca. 400 mA gesamt, Grenze fuer USB
 
 np = neopixel.NeoPixel(machine.Pin(PIN), W * H)
 
