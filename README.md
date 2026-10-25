@@ -41,20 +41,20 @@ def xy(x, y):
 ## Stromverbrauch und Helligkeit
 
 Bei voller Helligkeit zieht eine WS2812B in Weiß bis zu ca. 60 mA. 256 LEDs kämen damit auf über 15 A, viel zu viel für USB (500 mA).
-Deshalb begrenzt `MAX` in `main.py` jeden Farbkanal auf **10 von 255**, also etwa 4 %. Außerdem leuchten nie alle drei Kanäle gleichzeitig, und zusammen ergeben sie höchstens `MAX`.
+Deshalb begrenzt `MAX` in `main.py` jeden Farbkanal auf **16 von 255**, also etwa 6 %. Außerdem leuchten nie alle drei Kanäle gleichzeitig, und zusammen ergeben sie höchstens `MAX`.
 
 Grobe Schätzung:
 
 | Verbraucher | Strom |
 |---|---|
 | Ruhestrom der LEDs (0,6–1 mA pro LED, auch wenn sie aus sind) | 150–250 mA |
-| Leuchten bei `MAX = 10` (ca. 0,8 mA pro LED) | ca. 200 mA |
+| Leuchten bei `MAX = 16` (ca. 1,25 mA pro LED) | ca. 320 mA |
 | Pico | ca. 25 mA |
-| **Summe** | **ca. 375–475 mA** |
+| **Summe** | **ca. 500 mA** |
 
-Das liegt knapp unter den 500 mA, die ein USB-2.0-Port liefert.
+Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP29): Die Spannung fiel von 4,71 V (alle LEDs aus) gleichmäßig auf 4,61 V (MAX 22), ohne Einbruch.
 
-> Ohne externes 5-V-Netzteil `MAX` nicht weiter erhöhen.
+> Ohne externes 5-V-Netzteil `MAX` nicht über ca. 22 stellen. Bei Flackern oder Abstürzen auf 12 zurückgehen.
 > Mit Netzteil die 5 V direkt an die Matrizen führen und GND mit dem Pico verbinden.
 
 ## Dateien
@@ -93,6 +93,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 ## Anpassen
 
 - **Helligkeit:** `MAX` in `main.py`
+- **Helligkeitsausgleich je Matrix:** `GAIN` in `main.py`. Matrix 1 ist von Haus aus heller und läuft deshalb mit 0,63.
 - **Geschwindigkeit:** `off + 12` (Schrittweite) und `time.sleep_ms(20)` (Pause zwischen den Bildern)
 - **Ringbreite:** Faktor in `int(d * 48)`. Ein größerer Wert ergibt schmalere Ringe.
 

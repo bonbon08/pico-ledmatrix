@@ -4,7 +4,9 @@ import machine, neopixel, time, math
 
 PIN = 22
 W = H = 16
-MAX = 10  # max. Helligkeit pro Kanal (0-255) -> ca. 400 mA gesamt, Grenze fuer USB
+MAX = 16  # max. Helligkeit pro Kanal (0-255) -> ca. 500 mA gesamt, VSYS gemessen stabil bis MAX 22
+# Helligkeitsausgleich je Matrix (1, 2, 3, 4) - Matrix 1 ist etwas heller als die anderen
+GAIN = (0.63, 1.0, 1.0, 1.0)
 
 np = neopixel.NeoPixel(machine.Pin(PIN), W * H)
 
@@ -12,27 +14,28 @@ def xy(x, y):
     m = (x // 8) * 2 + (y // 8)
     return m * 64 + (y % 8) * 8 + (x % 8)
 
-def wheel(p):
-    # Farbrad 0..767, jeweils nur 2 Kanaele aktiv
+def wheel(p, mx):
+    # Farbrad 0..767, jeweils nur 2 Kanaele aktiv, Summe = mx
     if p < 256:
-        return (MAX * (255 - p) // 255, MAX * p // 255, 0)
+        return (mx * (255 - p) // 255, mx * p // 255, 0)
     p -= 256
     if p < 256:
-        return (0, MAX * (255 - p) // 255, MAX * p // 255)
+        return (0, mx * (255 - p) // 255, mx * p // 255)
     p -= 256
-    return (MAX * p // 255, 0, MAX * (255 - p) // 255)
+    return (mx * p // 255, 0, mx * (255 - p) // 255)
 
-# Vorberechnet: LED-Index und Abstand zur Mitte je Pixel
+# Vorberechnet: LED-Index, Abstand zur Mitte und Helligkeit je Pixel
 pix = []
 for y in range(H):
     for x in range(W):
+        i = xy(x, y)
         d = math.sqrt((x - 7.5) ** 2 + (y - 7.5) ** 2)
-        pix.append((xy(x, y), int(d * 48)))
+        pix.append((i, int(d * 48), round(MAX * GAIN[i // 64])))
 
 off = 0
 while True:
-    for i, d in pix:
-        np[i] = wheel((d - off) % 768)
+    for i, d, mx in pix:
+        np[i] = wheel((d - off) % 768, mx)
     np.write()
     off = (off + 12) % 768
     time.sleep_ms(20)
