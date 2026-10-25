@@ -15,14 +15,19 @@ def xy(x, y):
     return m * 64 + (y % 8) * 8 + (x % 8)
 
 def wheel(p, mx):
-    # Farbrad 0..767, jeweils nur 2 Kanaele aktiv, Summe = mx
+    # Farbrad 0..767, jeweils nur 2 Kanaele aktiv, Summe = mx.
+    # Gerundet statt abgerundet, damit Matrizen mit unterschiedlichem mx
+    # ihre Farbstufen zur selben Zeit wechseln.
     if p < 256:
-        return (mx * (255 - p) // 255, mx * p // 255, 0)
+        a = (mx * p + 127) // 255
+        return (mx - a, a, 0)
     p -= 256
     if p < 256:
-        return (0, mx * (255 - p) // 255, mx * p // 255)
+        a = (mx * p + 127) // 255
+        return (0, mx - a, a)
     p -= 256
-    return (mx * p // 255, 0, mx * (255 - p) // 255)
+    a = (mx * p + 127) // 255
+    return (a, 0, mx - a)
 
 # Vorberechnet: LED-Index, Abstand zur Mitte und Helligkeit je Pixel
 pix = []
