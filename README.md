@@ -69,6 +69,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/snake.py` | Snake, die von alleine spielt und meist das ganze Feld füllt |
 | `demos/gameoflife.py` | Conways Game of Life mit Überblenden und Farbe nach Zellalter |
 | `demos/feuer.py` | Lagerfeuer mit Flammenzungen, Wind und aufsteigenden Funken |
+| `demos/uhr.py` | Uhr: oben Stunden, unten Minuten, Sekundenring am Rand (60 Pixel) |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
 
@@ -83,6 +84,15 @@ uvx mpremote cp demos/tetris.py :main.py + reset
 ```
 
 `main.py` startet automatisch beim Einschalten. Der Treiber `neopixel` ist in MicroPython für den RP2040 schon enthalten.
+
+### Uhr
+
+Der Pico hat keine Uhr mit Batterie. Nach jedem Einstecken und nach jedem Hardware-Reset steht die Zeit auf dem 1.1.2021, die Uhr zeigt dann blinkend `-- --`.
+Deshalb die Zeit beim Hochladen vom PC übernehmen und `main.py` ohne Reset starten:
+
+```bash
+uvx mpremote cp demos/uhr.py :main.py + rtc --set + exec --no-follow "import main"
+```
 
 ## Eigene Demos
 
