@@ -41,7 +41,9 @@ def xy(x, y):
 ## Stromverbrauch und Helligkeit
 
 Bei voller Helligkeit zieht eine WS2812B in Weiß bis zu ca. 60 mA. 256 LEDs kämen damit auf über 15 A, viel zu viel für USB (500 mA).
-Deshalb begrenzt `MAX` in `main.py` jeden Farbkanal auf **16 von 255**, also etwa 6 %. Außerdem leuchten nie alle drei Kanäle gleichzeitig, und zusammen ergeben sie höchstens `MAX`.
+Deshalb begrenzt `MAX` in `matrix.py` jeden Farbkanal auf **16 von 255**, also etwa 6 %.
+
+Zusätzlich gibt es eine **Strombremse**: `show()` addiert alle Farbwerte. Liegt die Summe über `BUDGET`, wird das ganze Bild gleichmäßig gedimmt. `BUDGET` entspricht dem Regenbogen, bei dem jede LED zusammen 255 hat. Damit bleiben auch Demos mit vielen weißen oder gelben Pixeln im sicheren Bereich.
 
 Grobe Schätzung:
 
@@ -61,19 +63,36 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 
 | Datei | Zweck |
 |---|---|
-| `main.py` | Animation (Regenbogen-Ringe von der Mitte nach außen). Startet automatisch beim Einschalten. |
+| `matrix.py` | Gemeinsame Bibliothek: Koordinaten, Helligkeit, Helligkeitsausgleich, Strombremse |
+| `demos/regenbogen.py` | Regenbogen-Ringe von der Mitte nach außen |
+| `demos/tetris.py` | Zufällige Tetris-Steine fallen und stapeln sich, volle Reihen verschwinden |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
 
 ## Installation
 
-Benötigt wird [`mpremote`](https://docs.micropython.org/en/latest/reference/mpremote.html), z. B. über `uv`:
+Benötigt wird [`mpremote`](https://docs.micropython.org/en/latest/reference/mpremote.html), z. B. über `uv`.
+Zuerst einmal die Bibliothek hochladen, dann die gewünschte Demo als `main.py`:
 
 ```bash
-uvx mpremote cp main.py :main.py + reset
+uvx mpremote cp matrix.py :matrix.py
+uvx mpremote cp demos/tetris.py :main.py + reset
 ```
 
-Der Treiber `neopixel` ist in MicroPython für den RP2040 schon enthalten.
+`main.py` startet automatisch beim Einschalten. Der Treiber `neopixel` ist in MicroPython für den RP2040 schon enthalten.
+
+## Eigene Demos
+
+```python
+import matrix as m
+
+m.clear()
+m.set(0, 0, (255, 0, 0))      # Pixel oben links rot, Farben immer 0-255
+m.set(15, 15, m.wheel(300))   # Farbe aus dem Farbrad (0-767)
+m.show()                      # dimmt, korrigiert und sendet an die LEDs
+```
+
+`show()` braucht etwa 8 ms. Die Umrechnung läuft mit `@micropython.viper` als nativer Code, der Rest ist das Senden an die LEDs.
 
 ## Testbild
 
@@ -92,10 +111,10 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 
 ## Anpassen
 
-- **Helligkeit:** `MAX` in `main.py`
-- **Helligkeitsausgleich je Matrix und Farbe:** `GAIN` in `main.py`. Matrix 1 hat andere LEDs: Rot und Grün leuchten doppelt so hell, Blau etwa 1,45-mal. Sie läuft deshalb mit (0,5; 0,5; 0,69). Die Werte wurden per Auge mit einfarbigen Testbildern abgeglichen.
-- **Geschwindigkeit:** `off + 12` (Schrittweite) und `time.sleep_ms(20)` (Pause zwischen den Bildern)
-- **Ringbreite:** Faktor in `int(d * 48)`. Ein größerer Wert ergibt schmalere Ringe.
+- **Helligkeit:** `MAX` in `matrix.py`
+- **Helligkeitsausgleich je Matrix und Farbe:** `GAIN` in `matrix.py`. Matrix 1 hat andere LEDs: Rot und Grün leuchten doppelt so hell, Blau etwa 1,45-mal. Sie läuft deshalb mit (0,5; 0,5; 0,69). Die Werte wurden per Auge mit einfarbigen Testbildern abgeglichen.
+- **Regenbogen:** Die Geschwindigkeit stellt man über `off + 12` und `time.sleep_ms(20)` ein. Ein größerer Faktor in `int(d * 48)` ergibt schmalere Ringe.
+- **Tetris:** `FALL_MS` ist die Fallgeschwindigkeit. `SMART` ist der Anteil der Steine, die gut gelegt werden. Je höher der Wert, desto mehr Reihen werden voll.
 
 ## Fehlersuche
 
