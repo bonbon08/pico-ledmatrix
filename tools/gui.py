@@ -52,6 +52,7 @@ NAMES = {
     "ente": ("Tipp-Ente", "Pickt bei jedem Tastendruck am PC mit dem Schnabel auf ihre Tastatur. Ohne PC pickt sie von selbst, nach 30 s Ruhe schläft sie ein."),
     "mampf": ("Mampf", "Ein runder Knubbel läuft über die Wiese, saugt herabfallendes Essen ein, kaut, rülpst Sterne und rennt nach einer Peperoni rot glühend herum."),
     "terminal": ("Terminal", "Altes Bernstein-Terminal: links tippt sich Text Zeile für Zeile, rechts drucken sich Pixel-Symbole und ein Pegel hüpft im Takt."),
+    "oslogo": ("OS-Logo", "Das Logo des Betriebssystems dieses PCs, wie fastfetch es zeigt. Baut sich funkelnd auf, ein Glanzstreifen zieht darüber."),
     "roboter": ("Roboter", "Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft."),
     "erdblock": ("Erdblock", "Rotierender 3D-Erdblock im Minecraft-Stil."),
     "kopfstein": ("Pflasterstein", "Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt."),
@@ -211,6 +212,8 @@ class App(tk.Tk):
             extra = "\n\nDie Uhrzeit wird beim Hochladen vom PC übernommen."
         elif d["path"].stem == "visualizer":
             extra = "\n\nNach dem Hochladen startet die GUI das Senden des PC-Tons automatisch."
+        elif d["path"].stem == "oslogo":
+            extra = "\n\nBeim Hochladen wird das Logo mit fastfetch von diesem PC geholt und mitgeschickt."
         elif d["path"].stem in ("bongocat", "ente"):
             extra = ("\n\nNach dem Hochladen meldet die GUI jeden Tastendruck an den Pico (nur dass, nie welche "
                      "Taste). Dafür muss dein Benutzer in der Gruppe „input“ sein: "
@@ -230,6 +233,14 @@ class App(tk.Tk):
             return
         stem = d["path"].stem
         cmd = ["cp", str(MATRIX), ":matrix.py", "+", "cp", str(d["path"]), ":main.py", "+"]
+        if stem == "oslogo":
+            logo = Path(tempfile.mkdtemp(prefix="ledmatrix-")) / "oslogo.bin"
+            r = subprocess.run([sys.executable, str(ROOT / "tools" / "oslogo.py"), "--out", str(logo)],
+                               capture_output=True, text=True)
+            if r.returncode:
+                messagebox.showerror("OS-Logo", r.stderr.strip() or r.stdout.strip())
+                return
+            cmd += ["cp", str(logo), ":oslogo.bin", "+"]
         if stem == "uhr":
             # kein Reset, der wuerde die gerade gesetzte Uhrzeit wieder loeschen
             cmd += ["rtc", "--set", "+", "exec", "--no-follow", "import main"]
