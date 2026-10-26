@@ -3,8 +3,9 @@
 Gehäuse für die vier Matrizen und den Pico, parametrisch in OpenSCAD (`gehaeuse.scad`).
 Die vier Matrizen liegen stumpf aneinander. Davor sitzt ein Pixelraster mit 16×16 Zellen und ein dünner Diffusor, so ergibt sich ein durchgehendes Bild.
 
-> **Ungetestet.** Das Gehäuse wurde noch nicht gedruckt. Die Board-Maße sind nachgemessen, alles andere stammt aus Datenblättern oder ist geschätzt.
-> Vor dem großen Druck lohnt sich ein kurzer Probedruck einer Ecke.
+> **Stand nach dem ersten Druck:**
+> - **Halter:** Die Halter im Deckel stießen gegen die Kabel hinter den Matrizen. Der Deckel ist jetzt 1 cm tiefer, statt Haltenasen an den Seitenmitten und einer Mittelstütze gibt es nur noch kleine Eckhalter.
+> - **LED-Abstand:** Das Raster passte nicht, ab der Hälfte jeder Matrix lagen die LEDs neben den Löchern. Der LED-Abstand ist also nicht 8 mm. **Vor dem nächsten Druck des Frontrahmens bitte mit der Messlehre (`lehre.stl`) ausmessen** und `pitch_x` / `pitch_y` eintragen.
 
 | Front (Raster) | Deckel (innen) |
 |---|---|
@@ -20,10 +21,9 @@ Die vier Matrizen liegen stumpf aneinander. Davor sitzt ein Pixelraster mit 16×
    - liegen mit den LEDs zum Raster
    - Anordnung von vorne gesehen: 1 links oben, 2 links unten, 3 rechts oben, 4 rechts unten
 3. **Deckel** (`deckel.stl`)
-   - 28 mm Innenraum
-   - Haltenasen drücken die Platinen an den Ecken und Seitenmitten ans Raster. Die Kantenmitten bleiben frei, dort liegen die Lötpads.
-   - Die Ecke links oben ist frei für das Eingangskabel von Matrix 1.
-   - Eine Stütze in der Mitte hält die Stelle, an der sich die 4 Platinen treffen.
+   - 38 mm Innenraum, genug Platz für die Kabel hinter den Matrizen (ca. 1 cm)
+   - Kleine L-förmige Eckhalter drücken die Platinen an den äußeren Ecken ans Raster. In den Seitenmitten und in der Mitte laufen die Kabel zwischen den Matrizen, dort ist nichts.
+   - Die Ecke links oben ist frei für das Eingangskabel von Matrix 1. Welche Ecken Halter bekommen, steht in `corner_tabs`.
    - Zwei Schlüssellöcher zum Aufhängen
 
 **Pico:**
@@ -36,14 +36,27 @@ Die vier Matrizen liegen stumpf aneinander. Davor sitzt ein Pixelraster mit 16×
 
 | | |
 |---|---|
-| Außenmaß | 144,6 × 148,6 mm |
-| Tiefe | 40 mm (10 mm Front + 30 mm Deckel) |
+| Außenmaß | 148,6 × 152,6 mm |
+| Tiefe | 50 mm (10 mm Front + 40 mm Deckel) |
 | Matrix | 65 mm breit × 67 mm hoch, Platine ca. 3 mm mit LEDs |
 
 ## Material
 
-- 4 × M3-Schraube, selbstschneidend, ca. 35 mm lang (maximal 38 mm). Sie gehen durch die Deckelecken in den Rahmen.
+- 4 × M3×16, selbstschneidend. Sie werden von hinten in die Deckelecken gesteckt, die Köpfe sitzen versenkt, und greifen in den Rahmen. Höchstens 17 mm lang, sonst drücken sie vorne durch.
 - 4 × M2×6, selbstschneidend, für den Pico. Sie werden von der Pin-Seite durch die Pico-Löcher in die Abstandshalter gedreht.
+
+## LED-Abstand ausmessen (Messlehre)
+
+`lehre.stl` ist eine 1 mm dünne Platte mit sechs Lochreihen zu je 8 Löchern. Die Reihen haben die Abstände 8,0 bis 8,5 mm, jede ist mit ihrem Wert beschriftet. Der Druck dauert etwa 10 Minuten.
+
+1. Die Lehre waagerecht auf eine Matrix legen, so dass die erste LED einer Zeile im ersten Loch einer Reihe sitzt.
+2. Die Reihe suchen, in der alle 8 LEDs mittig in ihren Löchern sitzen. Ihr Wert kommt in `pitch_x`.
+3. Das Gleiche senkrecht für `pitch_y`.
+4. Danach `front.stl` neu erzeugen.
+
+```bash
+openscad -o lehre.stl -D 'teil="lehre"' gehaeuse.scad
+```
 
 ## Drucken
 
@@ -67,7 +80,8 @@ Alle Maße stehen oben in `gehaeuse.scad`. Die wichtigsten:
 
 - `board_x`, `board_y`, `pitch_x`, `pitch_y`: Maße der Matrix und LED-Abstand. Bitte nachmessen.
 - `grid_h`: Raster-Tiefe. Höher heißt weichere, gleichmäßigere Pixel.
-- `cav`: Tiefe des Innenraums. Mit angelöteten Kabeln statt Dupont reichen etwa 15 mm.
+- `cav`: Tiefe des Innenraums.
+- `corner_tabs`: Ecken mit Haltern (`"lo"`, `"ro"`, `"lu"`, `"ru"`).
 - `tol`: Spiel um die Matrizen, falls sie zu stramm oder zu locker sitzen.
 
 STL neu erzeugen:
@@ -79,6 +93,6 @@ openscad -o deckel.stl -D 'teil="deckel"' gehaeuse.scad
 
 ## Offene Punkte
 
-- **Nahtstelle oben/unten:** Bei 67 mm Board-Höhe und 8 mm LED-Abstand liegen die LEDs an der waagerechten Naht 11 mm statt 8 mm auseinander. Die Zellen dort werden deshalb etwas höher (9,5 mm).
-  Wenn die LEDs nicht mittig auf dem Board sitzen, bitte den Abstand vom Board-Rand zur ersten LED messen. Das lässt sich dann einbauen.
+- **LED-Abstand:** noch nicht gemessen, siehe Messlehre oben. Die Rasterwände sitzen immer mittig zwischen zwei LEDs, auch an den Nähten zwischen den Matrizen.
+  Das setzt voraus, dass die LEDs mittig auf dem Board sitzen. Falls nicht, bitte den Abstand vom Board-Rand zur ersten LED messen.
 - **Pico-Maße:** Die Maße kommen aus dem Datenblatt (51 × 21 mm, Löcher 47 × 11,4 mm). Die Lage der USB-Buchse ist geschätzt.

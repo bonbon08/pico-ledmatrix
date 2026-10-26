@@ -3,12 +3,12 @@
 // Alle Maße in mm. Koordinaten wie von vorne gesehen: x nach rechts, y nach oben.
 // Matrix 1 = links oben, 2 = links unten, 3 = rechts oben, 4 = rechts unten.
 
-teil = "beide";        // "front", "deckel", "beide" (nebeneinander), "explosion"
+teil = "beide";        // "front", "deckel", "beide" (nebeneinander), "explosion", "lehre"
 
 /* [Matrizen] */
 board_x = 65;          // Breite einer Matrix
 board_y = 67;          // Höhe einer Matrix
-pitch_x = 8;           // LED-Abstand waagerecht (Mitte zu Mitte)
+pitch_x = 8;           // LED-Abstand waagerecht (Mitte zu Mitte) -> mit teil = "lehre" ausmessen!
 pitch_y = 8;           // LED-Abstand senkrecht
 pcb_t   = 1.6;         // Leiterplattendicke (ohne LEDs)
 gap     = 0;           // Spalt zwischen den Matrizen (0 = stoßen aneinander)
@@ -18,20 +18,25 @@ tol     = 0.3;         // Spiel rundherum zwischen Matrizen und Rahmen
 diff_t    = 0.6;       // Diffusor vorne (0 = offen, z. B. für eigene Streuscheibe)
 grid_h    = 8;         // Raster-Tiefe = Abstand LED-Platine bis Diffusor
 grid_wall = 0.8;       // Wandstärke des Pixelrasters (2 Bahnen bei 0,4er Düse)
-wall      = 7;         // Rahmenbreite außen
+wall      = 9;         // Rahmenbreite außen (breit genug, dass die Schraubenköpfe im Deckel versenkt werden)
 press     = 0.2;       // Rahmen so viel flacher -> Deckel drückt Platinen leicht an
 
 /* [Deckel] */
 plate    = 2;          // Bodenstärke Deckel
-cav      = 28;         // Tiefe des Innenraums (Pico mit Dupont-Steckern + Kabelbogen)
-lip      = 2.5;        // wie weit die Haltenasen über die Platinen greifen
-tab_len  = 12;         // Länge der Haltenasen
-pillar_d = 8;          // Stütze in der Mitte (wo sich die 4 Matrizen treffen), 0 = keine
+cav      = 38;         // Tiefe des Innenraums: Pico mit Dupont-Steckern, Kabel hinter den Matrizen (ragen ca. 1 cm raus)
+lip      = 2.5;        // wie weit die Eckhalter über die Platinen greifen
+tab_len  = 8;          // Länge der Eckhalter je Schenkel
+// Eckhalter nur an den äußeren Ecken: In den Seitenmitten und in der Mitte laufen die Kabel
+// zwischen den Matrizen. "lo" (links oben) bleibt frei für das Eingangskabel von Matrix 1.
+corner_tabs = ["ro", "ru", "lu"];
+pillar_d = 0;          // Stütze in der Mitte (wo sich die 4 Matrizen treffen), 0 = keine
 keyholes = true;       // Schlüssellöcher zum Aufhängen
 
 /* [Schrauben] */
 screw_pilot = 2.6;     // Kernloch im Rahmen (M3 selbstschneidend)
 screw_clear = 3.4;     // Durchgangsloch im Deckel
+screw_head  = 6.2;     // Senkung für den Schraubenkopf, von unten im Deckel
+screw_grip  = 10;      // so viel Deckel bleibt unter dem Schraubenkopf -> kurze Schrauben reichen
 
 /* [Pico] */
 // Der Pico liegt umgedreht: Bauteilseite zum Deckelboden, Stiftleisten zeigen zu den Matrizen.
@@ -90,23 +95,25 @@ module deckel() {
                 cube([outer_x, outer_y, lh]);
                 translate([wall, wall, plate]) cube([inner_x, inner_y, lh]);
             }
-            // Haltenasen an Ecken und Seitenmitten (Lötpads in den Kantenmitten bleiben frei).
-            // Ecke links oben bleibt frei für das Eingangskabel von Matrix 1.
-            for (px = [wall, outer_x/2 - tab_len/2, outer_x - wall - tab_len]) {
-                tab_at(px, wall, tab_len, d);                                   // unten
-                if (px != wall) tab_at(px, outer_y - wall - d, tab_len, d);     // oben
-            }
-            for (py = [wall, outer_y/2 - tab_len/2, outer_y - wall - tab_len]) {
-                tab_at(outer_x - wall - d, py, d, tab_len);                     // rechts
-                if (py != outer_y - wall - tab_len) tab_at(wall, py, d, tab_len); // links
+            // Eckhalter: je Ecke ein L aus zwei kurzen Schenkeln an den Wänden
+            for (c = corner_tabs) {
+                rechts = c[0] == "r";
+                oben = c[1] == "o";
+                x0 = rechts ? outer_x - wall - tab_len : wall;
+                y0 = oben ? outer_y - wall - tab_len : wall;
+                tab_at(x0, oben ? outer_y - wall - d : wall, tab_len, d);
+                tab_at(rechts ? outer_x - wall - d : wall, y0, d, tab_len);
             }
             // Mittelstütze
             if (pillar_d > 0) translate([outer_x/2, outer_y/2, 0]) cylinder(d = pillar_d, h = lh);
             // Pico-Abstandshalter
             for (h = pico_holes) translate([h[0], h[1], 0]) cylinder(d = 3.6, h = plate + pico_so);  // schmal, damit die USB-Buchse vorbeipasst
         }
-        // Schraubenlöcher
-        for (c = corners) translate([c[0], c[1], -1]) cylinder(d = screw_clear, h = lh + 2);
+        // Schraubenlöcher, Kopf von unten versenkt
+        for (c = corners) translate([c[0], c[1], -1]) {
+            cylinder(d = screw_clear, h = lh + 2);
+            cylinder(d = screw_head, h = lh - screw_grip + 1);
+        }
         // Pico-Löcher
         for (h = pico_holes) translate([h[0], h[1], 1]) cylinder(d = pico_hole, h = lh);
         // USB-Durchbruch links (Micro-USB-Stecker)
@@ -121,14 +128,37 @@ module deckel() {
     }
 }
 
+// ---------- Messlehre für den LED-Abstand ----------
+// Dünne Platte mit je 8 Löchern pro Reihe, Abstand 8,0 bis 8,5 mm. Auf eine Matrix legen
+// (einmal waagerecht, einmal senkrecht): Die Reihe, in der alle 8 LEDs mittig im Loch sitzen,
+// ist der richtige Wert für pitch_x bzw. pitch_y.
+lehre_pitches = [8.0, 8.1, 8.2, 8.3, 8.4, 8.5];
+module lehre() {
+    hole = 5.6;
+    rows = len(lehre_pitches);
+    len_x = 18 + 7 * lehre_pitches[rows - 1] + hole + 4;
+    difference() {
+        cube([len_x, rows * 9 + 2, 1]);
+        for (r = [0:rows - 1]) {
+            p = lehre_pitches[r];
+            for (i = [0:7])
+                translate([18 + i * p, 2 + r * 9, -1]) cube([hole, hole, 3]);
+            // Beschriftung eingraviert
+            translate([1.5, 2.6 + r * 9, 0.5]) linear_extrude(1)
+                text(str(p), size = 4, font = "Liberation Sans:style=Bold");
+        }
+    }
+}
+
 // ---------- Ausgabe ----------
 if (teil == "front") front();
 else if (teil == "deckel") deckel();
 else if (teil == "beide") { front(); translate([outer_x + 10, 0, 0]) deckel(); }
+else if (teil == "lehre") lehre();
 else if (teil == "explosion") {
     color("white") translate([0, 0, lh + 30 + fh]) mirror([0, 0, 1]) front();
     color("gray") deckel();
 }
 
 echo(str("Außenmaß: ", outer_x, " x ", outer_y, " mm, Gesamttiefe: ", fh + lh, " mm"));
-echo(str("Schrauben: 4x M3, max. Länge ", lh + fh - diff_t - 1, " mm (selbstschneidend), Pico: 4x M2 x 6"));
+echo(str("Schrauben: 4x M3 x ", floor(screw_grip + fh - diff_t - 2), " mm oder kürzer (selbstschneidend), Pico: 4x M2 x 6"));
