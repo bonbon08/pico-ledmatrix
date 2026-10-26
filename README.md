@@ -74,6 +74,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/rennen_hinten.py` | Autorennen von hinten (Pseudo-3D) mit Kurven, Sonnenuntergang, Palmen und Gegenverkehr ([Vorschau](bilder/rennen_hinten.png)) |
 | `demos/shooter.py` | Ego-Shooter im 90er-Stil, der sich selbst spielt: Raycasting, eigenes Labyrinth, Schleimmonster ([Vorschau](bilder/shooter.png)) |
 | `demos/visualizer.py` | Sound-Visualizer: 16 Frequenzbalken vom PC-Ton, braucht `tools/visualizer.py` auf dem PC |
+| `demos/bongocat.py` | Bongo-Katze, die bei jedem Tastendruck am PC auf ihre Tastatur haut, braucht `tools/tastatur.py` ([Vorschau](bilder/bongocat.png)) |
 | `demos/roboter.py` | Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft ([Vorschau](bilder/roboter.png)) |
 | `demos/kopfstein.py` | Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt ([Vorschau](bilder/kopfstein.png)) |
 | `demos/matrixcode.py` | Grüner Matrix-Code-Regen mit flackernden Zeichen ([Vorschau](bilder/matrixcode.png)) |
@@ -84,6 +85,8 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/kirschbaum.py` | Blauer Kirschblütenbaum bei Nacht mit fallenden Blütenblättern ([Vorschau](bilder/kirschbaum.png)) |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
 | `tools/visualizer.py` | PC-Seite des Sound-Visualizers |
+| `tools/tastatur.py` | PC-Seite der Bongo-Katze: meldet Tastendrücke an den Pico |
+| `tools/vorschau.py` | Vorschaubild einer Demo auf dem PC erzeugen, ohne Pico |
 | `tools/gui.py` | GUI zum Auswählen und Hochladen von Demos und eigenen Bildern/GIFs |
 | `demos/_bild.py` | Player für eigene Bilder/GIFs (lädt die GUI zusammen mit `bild.bin` hoch) |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
@@ -149,6 +152,21 @@ python tools/visualizer.py          # benötigt parec, numpy, pyserial; Strg+C b
 Solange `tools/visualizer.py` läuft, belegt es den USB-Port. `mpremote` funktioniert dann nicht.
 Übertragen werden nur druckbare Zeichen (`'0'` + Pegel 0–64 je Band, dann ein Zeilenende). So landet nie versehentlich ein Strg+C beim Pico.
 
+### Bongo-Katze
+
+Die Katze haut bei jedem Tastendruck am PC auf ihre Tastatur, abwechselnd mit der linken und der rechten Pfote. Ohne PC trommelt sie im Demo-Modus von selbst, nach 30 Sekunden ohne Tastendruck schläft sie ein.
+
+`tools/tastatur.py` liest die Tastatur direkt aus `/dev/input`. Das funktioniert auch unter Wayland und unabhängig davon, welches Fenster aktiv ist. Dafür muss der Benutzer einmalig in die Gruppe `input`:
+
+```bash
+sudo usermod -aG input $USER      # danach ab- und wieder anmelden
+uvx mpremote cp demos/bongocat.py :main.py + reset
+python tools/tastatur.py
+```
+
+Zum Pico geht pro Tastendruck nur ein `k`, nie welche Taste gedrückt wurde. Dazu kommt jede Sekunde ein `.` als Lebenszeichen.
+Wichtig: Mit der Gruppe `input` dürfen **alle** Programme dieses Benutzers die Tastatur mitlesen, nicht nur dieses. Wem das zu weit geht, der lässt die Katze im Demo-Modus laufen.
+
 ## Eigene Demos
 
 ```python
@@ -159,6 +177,8 @@ m.set(0, 0, (255, 0, 0))      # Pixel oben links rot, Farben immer 0-255
 m.set(15, 15, m.wheel(300))   # Farbe aus dem Farbrad (0-767)
 m.show()                      # dimmt, korrigiert und sendet an die LEDs
 ```
+
+Ein Vorschaubild ohne Pico erzeugt `python tools/vorschau.py demos/meine_demo.py bilder/meine_demo.png 30,60,90`. Die Zahlen sind die Nummern der Bilder, die nebeneinander gezeigt werden.
 
 `show()` braucht etwa 8 ms. Die Umrechnung läuft mit `@micropython.viper` als nativer Code, der Rest ist das Senden an die LEDs.
 

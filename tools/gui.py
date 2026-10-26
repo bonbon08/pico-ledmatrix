@@ -26,7 +26,9 @@ DEMOS = ROOT / "demos"
 BILDER = ROOT / "bilder"
 MATRIX = ROOT / "matrix.py"
 PLAYER = DEMOS / "_bild.py"
-VISUALIZER_PC = ROOT / "tools" / "visualizer.py"
+# Demos, zu denen auf dem PC ein Sender laufen muss
+SENDERS = {"visualizer": ROOT / "tools" / "visualizer.py",
+           "bongocat": ROOT / "tools" / "tastatur.py"}
 
 N = 16
 MAX_FRAMES = 400           # 768 Byte je Bild -> ca. 300 KB im Flash des Pico
@@ -45,6 +47,7 @@ NAMES = {
     "matrixcode": ("Matrix-Code", "Grüner Code-Regen mit flackernden Zeichen."),
     "uhr": ("Uhr", "Oben Stunden, unten Minuten, der Rand zeigt als Ring die Sekunden."),
     "visualizer": ("Sound-Visualizer", "16 Frequenzbalken zu dem Ton, der gerade auf dem PC läuft."),
+    "bongocat": ("Bongo-Katze", "Haut bei jedem Tastendruck am PC auf ihre Tastatur. Ohne PC trommelt sie von selbst, nach 30 s Ruhe schläft sie ein."),
     "roboter": ("Roboter", "Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft."),
     "erdblock": ("Erdblock", "Rotierender 3D-Erdblock im Minecraft-Stil."),
     "kopfstein": ("Pflasterstein", "Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt."),
@@ -146,7 +149,7 @@ class App(tk.Tk):
         self.port_box.pack(side="left", padx=6)
         ttk.Button(top, text="Suchen", command=self.refresh_ports).pack(side="left")
         ttk.Button(top, text="Matrix ausschalten", command=self.switch_off).pack(side="right")
-        self.sender_btn = ttk.Button(top, text="Visualizer stoppen", command=self.stop_sender,
+        self.sender_btn = ttk.Button(top, text="PC-Sender stoppen", command=self.stop_sender,
                                      state="disabled")
         self.sender_btn.pack(side="right", padx=6)
 
@@ -204,6 +207,10 @@ class App(tk.Tk):
             extra = "\n\nDie Uhrzeit wird beim Hochladen vom PC übernommen."
         elif d["path"].stem == "visualizer":
             extra = "\n\nNach dem Hochladen startet die GUI das Senden des PC-Tons automatisch."
+        elif d["path"].stem == "bongocat":
+            extra = ("\n\nNach dem Hochladen meldet die GUI jeden Tastendruck an den Pico (nur dass, nie welche "
+                     "Taste). Dafür muss dein Benutzer in der Gruppe „input“ sein: "
+                     "sudo usermod -aG input $USER, danach ab- und wieder anmelden.")
         self.demo_desc.config(text=d["desc"] + extra)
         if d["preview"]:
             img = Image.open(d["preview"])
@@ -224,7 +231,7 @@ class App(tk.Tk):
             cmd += ["rtc", "--set", "+", "exec", "--no-follow", "import main"]
         else:
             cmd += ["reset"]
-        after = self.start_sender if stem == "visualizer" else None
+        after = (lambda: self.start_sender(SENDERS[stem])) if stem in SENDERS else None
         self.run(cmd, f"Lade „{d['title']}“ …", f"„{d['title']}“ läuft", after)
 
     # ---------- Eigenes Bild ----------
@@ -411,8 +418,8 @@ class App(tk.Tk):
                 "try:\n    os.remove('main.py')\nexcept OSError:\n    pass")
         self.run(["exec", code], "Schalte aus …", "Matrix aus (startet beim Einstecken nichts mehr)")
 
-    # ---------- Sound-Visualizer ----------
-    def start_sender(self):
+    # ---------- PC-Sender (Sound-Visualizer, Bongo-Katze) ----------
+    def start_sender(self, script):
         port = self.port_device()   # Tk-Variablen nur im Haupt-Thread lesen
 
         def go():
@@ -422,9 +429,9 @@ class App(tk.Tk):
             while not Path(port).exists() and time.time() - t < 10:
                 time.sleep(0.3)
             time.sleep(1.0)
-            self.sender = subprocess.Popen([sys.executable, "-u", str(VISUALIZER_PC), "--port", port],
+            self.sender = subprocess.Popen([sys.executable, "-u", str(script), "--port", port],
                                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            self.log_q.put("Visualizer-Sender gestartet")
+            self.log_q.put(f"PC-Sender {script.name} gestartet")
             for line in self.sender.stdout:
                 self.log_q.put(line.rstrip())
         threading.Thread(target=go, daemon=True).start()
@@ -437,7 +444,7 @@ class App(tk.Tk):
                 self.sender.wait(3)
             except subprocess.TimeoutExpired:
                 self.sender.kill()
-            self.log_q.put("Visualizer-Sender gestoppt")
+            self.log_q.put("PC-Sender gestoppt")
         self.sender = None
         self.sender_btn.config(state="disabled")
 
