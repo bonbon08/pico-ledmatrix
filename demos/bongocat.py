@@ -1,6 +1,7 @@
 # Demo: Bongo-Katze. Die Katze haut bei jedem Tastendruck am PC auf ihre Tastatur, abwechselnd
-# links und rechts. Der PC (tools/tastatur.py) schickt pro Tastendruck ein "k" und jede Sekunde
-# ein "." als Lebenszeichen - welche Taste gedrueckt wurde, erfaehrt der Pico nie.
+# links und rechts. Der PC (tools/tastatur.py) schickt pro Tastendruck einen Buchstaben fuer die
+# Tastaturreihe ("k", "q", "a", "y") und jede Sekunde ein Lebenszeichen ("." oder "h") - welche
+# Taste gedrueckt wurde, erfaehrt der Pico nie.
 # Ohne PC tippt sie im Demo-Modus von selbst, nach langer Pause schlaeft sie ein.
 import sys, time, select, random
 import matrix as m
@@ -60,10 +61,10 @@ def read_input():
         c = inp.read(1)
         if not c:
             break
-        if c == b"k":
+        if c in b"kqay":         # Tastendruck (Reihe ist der Katze egal)
             hits += 1
             alive = True
-        elif c == b".":
+        elif c in b".hl":
             alive = True
     return hits, alive
 

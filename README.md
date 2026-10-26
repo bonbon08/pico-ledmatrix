@@ -92,12 +92,14 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/kirschbaum.py` | Blauer Kirschblütenbaum bei Nacht mit fallenden Blütenblättern ([Vorschau](bilder/kirschbaum.png)) |
 | `tools/testbild.py` | Testbild zum Prüfen der Ausrichtung |
 | `tools/visualizer.py` | PC-Seite des Sound-Visualizers |
-| `tools/tastatur.py` | PC-Seite der Bongo-Katze und der Tipp-Ente: meldet Tastendrücke an den Pico |
+| `tools/tastatur.py` | PC-Seite der Bongo-Katze und der Tipp-Ente: meldet Tastendrücke (nur die Tastaturreihe) und Loslassen an den Pico |
 | `tools/oslogo.py` | Holt das Logo von fastfetch, rechnet es auf 16×16 um und lädt es mit der Demo hoch |
 | `tools/video.py` | PC-Seite des Videos: dekodiert mit ffmpeg (Dateien oder Links über yt-dlp) und streamt an den Pico |
 | `tools/vorschau.py` | Vorschaubild einer Demo auf dem PC erzeugen, ohne Pico; mit `--live` läuft sie in Echtzeit (für die GUI) |
 | `tools/bildschirm.py` | PC-Bildschirm live an den Pico streamen (Wayland über die Bildschirmfreigabe, X11 über ffmpeg) |
 | `tools/gui.py` | GUI für alles: Demos mit Live-Vorschau, Bilder/GIFs, Video und Bildschirm, OS-Logo, Werkzeuge |
+| `tools/starten.sh` | Starter für den Startmenü-Eintrag: holt per `git pull` die neueste Version und startet die GUI |
+| `tools/symbol.png` | Symbol für Startmenü und Fenster |
 | `demos/_bild.py` | Player für eigene Bilder/GIFs (lädt die GUI zusammen mit `bild.bin` hoch) |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
 
@@ -127,6 +129,7 @@ Oben steht, ob der Pico verbunden ist (grüner Punkt), was gerade auf der Matrix
   - Audioquelle für den Visualizer.
   - Prüfung der Tastatur-Rechte.
   - Dateien und freier Speicher auf dem Pico.
+  - **Ins Startmenü:** legt `~/.local/share/applications/ledmatrix.desktop` an. Der Eintrag startet `tools/starten.sh`, das vorher `git pull --ff-only` macht, so läuft immer die neueste Version. Ohne Netz, auf einem anderen Branch oder bei lokalen Änderungen, die im Weg sind, startet die vorhandene Version. Was passiert ist, steht im Protokoll.
 
 Neue Demos in `demos/` erscheinen automatisch in der Liste. Der Name kommt aus `NAMES` in `tools/gui.py`, sonst aus dem Kopfkommentar der Demo (`# Demo: Name. Beschreibung`). Hinweise unter der Beschreibung stehen in `HINTS`. Dateien, die mit `_` beginnen, sind keine Demos.
 
@@ -221,7 +224,7 @@ Wichtig: Mit der Gruppe `input` dürfen **alle** Programme dieses Benutzers die 
 
 ### Tipp-Ente
 
-Funktioniert genauso wie die Bongo-Katze und nutzt denselben Sender: Bei jedem Tastendruck beugt die Ente den Hals vor und pickt auf eine Taste, die kurz aufleuchtet. Bei schnellem Tippen richtet sie sich zwischen den Picks nicht ganz auf. Ohne PC pickt sie im Demo-Modus von selbst, nach 30 Sekunden ohne Tastendruck steckt sie den Kopf ein und schläft.
+Funktioniert genauso wie die Bongo-Katze und nutzt denselben Sender: Bei jedem Tastendruck beugt die Ente den Hals vor und pickt auf eine Taste, die aufleuchtet. Welche ihrer drei Tasten, hängt von der Reihe der echten Taste ab: obere Reihen (Ziffern, QWERTZ, F-Tasten) hinten, mittlere Reihe in der Mitte, untere Reihe mit Leertaste vorne, alles andere zufällig. Der Sender schickt dafür nur die Reihe, nie die Taste. Solange eine Taste gehalten wird, bleibt der Schnabel unten. Bei schnellem Tippen richtet sie sich zwischen den Picks nicht ganz auf. Ohne PC pickt sie im Demo-Modus von selbst, nach 30 Sekunden ohne Tastendruck steckt sie den Kopf ein und schläft.
 
 ```bash
 uvx mpremote cp demos/ente.py :main.py + reset
@@ -274,7 +277,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Aquarium:** `FISH` ist die Anzahl der Fische (Farben in `FISH_COLS`), `BUBBLE_RATE` die Häufigkeit der Luftblasen. Die Fischform steht in `FISH_ART`, das Seegras in `WEEDS` als (x, Höhe).
 - **Sternhimmel:** `STARS` ist die Anzahl der Sterne, `SHOOT` die Häufigkeit der Sternschnuppen (0,006 = etwa alle 7 Sekunden). Mit `MOON` lässt sich der Mond ein- und ausschalten.
 - **Kirschbaum:** Die Form steht als Pixel-Art in `ART` (B = Blüte, T = Stamm, G = Boden, * = Stern), die Farben in `BLUES`. `PETALS` und `PETAL_RATE` steuern die Blütenblätter.
-- **Tipp-Ente:** Die Ente steht als Pixel-Art in `ART` (Körper) und `HEAD` (vier Kopfhaltungen), die Farben in `COL`. `PECK` ist der Ablauf eines Picks (eine Zahl pro Bild), `SLEEP_AFTER` die Zeit bis zum Einschlafen.
+- **Tipp-Ente:** Die Ente steht als Pixel-Art in `ART` (Körper) und `HEAD` (Kopfhaltungen, darunter eine pro Taste), die Farben in `COL`. In `KEYS` steht je Taste die Kopfhaltung, die leuchtenden Pixel und die Stelle der Funken. `PECK` ist der Ablauf eines Picks (eine Zahl pro Bild), `SLEEP_AFTER` die Zeit bis zum Einschlafen.
 - **Mampf:** `SPAWN` ist die Häufigkeit des Essens, `MAX_ITEMS` die Höchstzahl gleichzeitig. Das Essen steht in `ITEMS` als 3×3-Pixel-Art mit Gewicht (je höher, desto häufiger). `SPEED` und `HOT_SPEED` sind das Lauftempo, `BURP_AFTER` die Happen bis zum Rülpser. Die Figur steht in `BODY`, `MOUTH` und `FEET`, die Farben in `COL`.
 - **Terminal:** `TYPE_FRAMES` ist das Tipptempo, `LINE_PAUSE` und `VERSE_PAUSE` die Pausen nach Zeile und Strophe, `VERSE_LINES` die Zeilen pro Strophe. Die Symbole stehen in `ICONS` (6×6), die Farben in `AMBER`, `FRESH` und `FRAME`.
 - **OS-Logo:** `HOLD` ist die Standzeit, `GLINT_EVERY` der Abstand der Glanzstreifen, `BUILD_SPEED` das Tempo von Aufbau und Zerfall. In `tools/oslogo.py` regeln `LOW` und `HIGH` den Kontrast beim Umrechnen (höheres `LOW` = weniger schwache Randpixel), `ANSI` die Farben.

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Tastatur-Sender fuer Bongo-Katze und Tipp-Ente: meldet dem Pico jeden Tastendruck am PC.
 
-Gesendet wird pro Tastendruck nur ein "k" (nie, welche Taste) und jede Sekunde ein "." als
-Lebenszeichen. Gelesen wird direkt aus /dev/input, das funktioniert auch unter Wayland und
-egal welches Fenster aktiv ist. Dafuer muss der Benutzer in der Gruppe "input" sein:
+Gesendet wird nie, welche Taste gedrueckt wurde, nur ihre Reihe auf der Tastatur: "q" fuer die
+oberen Reihen (Ziffern, QWERTZ, F-Tasten), "a" fuer die mittlere, "y" fuer die untere mit Leertaste,
+"k" fuer alles andere. Beim Loslassen kommt ein "l", jede Sekunde ein Lebenszeichen: "." wenn keine
+Taste mehr gehalten wird, sonst "h". Gelesen wird direkt aus /dev/input, das funktioniert auch
+unter Wayland und egal welches Fenster aktiv ist. Dafuer muss der Benutzer in der Gruppe "input" sein:
 
     sudo usermod -aG input $USER     (danach ab- und wieder anmelden)
 
@@ -22,6 +24,14 @@ from serial.tools import list_ports
 
 EVENT = struct.Struct("llHHi")       # struct input_event: Zeit (2x long), Typ, Code, Wert
 EV_KEY = 1
+# Linux-Tastencodes je Reihe (gelten fuer QWERTZ und QWERTY gleich, es sind Positionen)
+ROW = {}
+for c in [1, *range(2, 28), *range(59, 69), 87, 88]:         # Esc, Ziffern, Q-Reihe, F1-F12
+    ROW[c] = b"q"
+for c in [28, *range(30, 42), 43, 58]:           # Enter, A-Reihe, #, Feststell
+    ROW[c] = b"a"
+for c in [29, 42, *range(44, 58), 86, 97, 100, 125, 126]:    # Strg, Umschalt, Y-Reihe, Alt, Leertaste, <>, Super
+    ROW[c] = b"y"
 
 
 def find_port():
@@ -78,10 +88,11 @@ def main():
     port = serial.Serial(args.port or find_port(), 115200, timeout=0)
     print(f"Lese {len(fds)} Tastatur(en), sende an {port.port}, Strg+C zum Beenden")
     last_beat = 0.0
+    held = set()
     try:
         while True:
             ready, _, _ = select.select(list(fds), [], [], 0.5)
-            hits = 0
+            out = b""
             for fd in ready:
                 try:
                     data = os.read(fd, EVENT.size * 64)
@@ -90,13 +101,20 @@ def main():
                     del fds[fd]
                     continue
                 for i in range(0, len(data) - EVENT.size + 1, EVENT.size):
-                    _, _, typ, _, value = EVENT.unpack_from(data, i)
-                    if typ == EV_KEY and value == 1:     # gedrueckt (nicht gehalten/losgelassen)
-                        hits += 1
+                    _, _, typ, code, value = EVENT.unpack_from(data, i)
+                    if typ != EV_KEY or code >= 0x100:   # Maustasten u. a. nicht mitzaehlen
+                        continue
+                    if value == 1 and (fd, code) not in held:           # gedrueckt
+                        held.add((fd, code))
+                        out += ROW.get(code, b"k")
+                    elif value == 0 and (fd, code) in held:             # losgelassen
+                        held.discard((fd, code))
+                        out += b"l"
+                    # value 2 = automatische Wiederholung beim Halten, ignorieren
             now = time.monotonic()
-            out = b"k" * hits
             if now - last_beat > 1:
-                out += b"."
+                held = {k for k in held if k[0] in fds}
+                out += b"h" if held else b"."
                 last_beat = now
                 if not fds:                # neu eingesteckte Tastaturen finden
                     fds, _ = open_keyboards()

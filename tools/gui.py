@@ -5,7 +5,8 @@
 - Bild / GIF: eigene Bilder und GIFs umrechnen und hochladen
 - Video & Bildschirm: Videodatei, Link oder den Bildschirm live auf die Matrix streamen
 - OS-Logo: Logo (wie bei fastfetch) waehlen, Kontrast einstellen, hochladen
-- Werkzeuge: Testbild, Uhr stellen, Audioquelle, Tastatur-Rechte, Dateien auf dem Pico
+- Werkzeuge: Testbild, Uhr stellen, Audioquelle, Tastatur-Rechte, Dateien auf dem Pico,
+  Eintrag im Startmenue (startet ueber tools/starten.sh und holt vorher die neueste Version)
 
 Die Sender (tools/visualizer.py, tastatur.py, video.py, bildschirm.py) bleiben eigene Programme
 und laufen auch ohne GUI; die GUI startet sie mit den eingestellten Optionen.
@@ -62,7 +63,7 @@ NAMES = {
     "uhr": ("Uhr", "Oben Stunden, unten Minuten, der Rand zeigt als Ring die Sekunden."),
     "visualizer": ("Sound-Visualizer", "16 Frequenzbalken zu dem Ton, der gerade auf dem PC läuft."),
     "bongocat": ("Bongo-Katze", "Haut bei jedem Tastendruck am PC auf ihre Tastatur. Ohne PC trommelt sie von selbst, nach 30 s Ruhe schläft sie ein."),
-    "ente": ("Tipp-Ente", "Pickt bei jedem Tastendruck am PC mit dem Schnabel auf ihre Tastatur. Ohne PC pickt sie von selbst, nach 30 s Ruhe schläft sie ein."),
+    "ente": ("Tipp-Ente", "Pickt bei jedem Tastendruck am PC mit dem Schnabel auf ihre Tastatur, je nach Tastaturreihe auf eine andere Taste, gehaltene Tasten hält sie gedrückt. Ohne PC pickt sie von selbst, nach 30 s Ruhe schläft sie ein."),
     "mampf": ("Mampf", "Ein runder Knubbel läuft über die Wiese, saugt herabfallendes Essen ein, kaut, rülpst Sterne und rennt nach einer Peperoni rot glühend herum."),
     "terminal": ("Terminal", "Altes Bernstein-Terminal: links tippt sich Text Zeile für Zeile, rechts drucken sich Pixel-Symbole und ein Pegel hüpft im Takt."),
     "oslogo": ("OS-Logo", "Das Logo des Betriebssystems, wie fastfetch es zeigt. Baut sich funkelnd auf, ein Glanzstreifen zieht darüber."),
@@ -251,8 +252,12 @@ class LivePreview:
 
 class App(tk.Tk):
     def __init__(self):
-        super().__init__()
+        super().__init__(className="ledmatrix")       # Fensterklasse "Ledmatrix", passt zum Startmenue-Eintrag
         self.title("LED-Matrix")
+        try:
+            self.iconphoto(True, tk.PhotoImage(file=str(TOOLS / "symbol.png")))
+        except tk.TclError:
+            pass
         self.geometry("1060x800")
         self.minsize(900, 660)
         self.configure(bg=BG)
@@ -279,6 +284,8 @@ class App(tk.Tk):
         self.nb.bind("<<NotebookTabChanged>>", lambda e: self.tab_changed())
         self.build_bottom()
 
+        if os.environ.get("LEDMATRIX_UPDATE"):          # vom Startmenue-Starter
+            self.log_q.put(os.environ["LEDMATRIX_UPDATE"])
         self.refresh_ports()
         self.after(100, self.pump_log)
         self.after(40, self.pump_preview)
@@ -840,6 +847,12 @@ class App(tk.Tk):
         self.tool_row(box, "Uhrzeit stellen", "Übernimmt die Uhrzeit des PCs. Der Pico hat keine Batterie, "
                       "nach dem Ausstecken ist die Zeit weg. Startet die Uhr neu, falls sie läuft.", self.set_clock)
 
+        box = ttk.LabelFrame(col1, text="Startmenü", padding=10)
+        box.pack(fill="x")
+        self.tool_row(box, "Ins Startmenü", "Legt „LED-Matrix“ im Startmenü an. Beim Start holt der Eintrag "
+                      "jedes Mal die neueste Version von GitHub (git pull), ohne Netz startet die "
+                      "vorhandene.", self.install_launcher)
+
         box = ttk.LabelFrame(col2, text="Sound-Visualizer", padding=10)
         box.pack(fill="x")
         ttk.Label(box, text="Audioquelle (Standard: was gerade abgespielt wird)").pack(anchor="w")
@@ -885,12 +898,30 @@ class App(tk.Tk):
         if not found:
             text, col = "Keine Tastatur gefunden.", BAD
         elif readable:
-            text, col = f"OK: {readable} Tastatur(en) lesbar. Tastendrücke werden gezählt, nie welche Taste.", OK
+            text, col = f"OK: {readable} Tastatur(en) lesbar. Gemeldet wird nur die Reihe der Taste, nie welche Taste.", OK
         else:
             text, col = ("Keine Berechtigung. Einmalig im Terminal ausführen, danach ab- und wieder anmelden:\n"
                          "sudo usermod -aG input $USER\nDanach dürfen alle Programme dieses Benutzers die "
                          "Tastatur mitlesen."), ACCENT
         self.kbd_lbl.config(text=text, foreground=col)
+
+    def install_launcher(self):
+        apps = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local/share") / "applications"
+        entry = apps / "ledmatrix.desktop"
+        apps.mkdir(parents=True, exist_ok=True)
+        entry.write_text("[Desktop Entry]\n"
+                         "Type=Application\n"
+                         "Name=LED-Matrix\n"
+                         "Comment=Pico-LED-Matrix steuern: Demos, Bilder, Video\n"
+                         f"Exec=\"{TOOLS / 'starten.sh'}\"\n"
+                         f"Icon={TOOLS / 'symbol.png'}\n"
+                         "Terminal=false\n"
+                         "Categories=Utility;\n"
+                         "StartupWMClass=Ledmatrix\n")
+        if shutil.which("update-desktop-database"):
+            subprocess.run(["update-desktop-database", str(apps)], capture_output=True)
+        self.status.set("„LED-Matrix“ steht jetzt im Startmenü")
+        self.log_q.put(f"Startmenü-Eintrag angelegt: {entry}")
 
     def testbild(self):
         if self.check_ready():
