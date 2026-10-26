@@ -8,7 +8,7 @@ nicht hinterher, werden Bilder ausgelassen, damit das Video im Takt bleibt.
 
 Aufruf:  python tools/video.py film.mp4
          python tools/video.py "https://www.youtube.com/watch?v=..."   (braucht yt-dlp)
-         python tools/video.py film.mp4 --fps 20 --rand --schleife
+         python tools/video.py film.mp4 --fps 20 --modus rand --schleife
 Benoetigt: ffmpeg, pyserial; fuer Links yt-dlp
 """
 import argparse
@@ -46,10 +46,12 @@ def resolve(src):
         sys.exit("yt-dlp konnte den Link nicht oeffnen:\n" + e.stderr.strip())
 
 
-def ffmpeg(src, fps, rand, loop, sat, contrast):
-    if rand:   # ganzes Bild mit schwarzem Rand
+def ffmpeg(src, fps, modus, loop, sat, contrast):
+    if modus == "rand":          # ganzes Bild mit schwarzem Rand
         fit = f"scale={N}:{N}:force_original_aspect_ratio=decrease:flags=area,pad={N}:{N}:(ow-iw)/2:(oh-ih)/2"
-    else:      # quadratisch zuschneiden
+    elif modus == "strecken":
+        fit = f"scale={N}:{N}:flags=area"
+    else:                        # quadratisch zuschneiden
         fit = f"crop='min(iw,ih)':'min(iw,ih)',scale={N}:{N}:flags=area"
     vf = f"fps={fps},{fit},eq=saturation={sat}:contrast={contrast}"
     cmd = ["ffmpeg", "-loglevel", "error"]
@@ -67,7 +69,9 @@ def main():
     ap.add_argument("quelle", help="Videodatei oder Link")
     ap.add_argument("--port")
     ap.add_argument("--fps", type=float, default=25, help="Bilder pro Sekunde (Standard 25)")
-    ap.add_argument("--rand", action="store_true", help="ganzes Bild mit Rand statt zuschneiden")
+    ap.add_argument("--modus", choices=("zuschneiden", "rand", "strecken"), default="zuschneiden",
+                    help="an 16x16 anpassen: Mitte zuschneiden, ganzes Bild mit Rand oder strecken")
+    ap.add_argument("--rand", action="store_true", help="kurz fuer --modus rand")
     ap.add_argument("--schleife", action="store_true", help="Video endlos wiederholen")
     ap.add_argument("--farbe", type=float, default=1.4, help="Farbsaettigung (1 = unveraendert)")
     ap.add_argument("--kontrast", type=float, default=1.15, help="Kontrast (1 = unveraendert)")
@@ -76,7 +80,8 @@ def main():
     # beim Beenden von aussen (z. B. durch die GUI) ffmpeg mit beenden
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     port = serial.Serial(args.port or find_port(), 115200, timeout=0, write_timeout=3)
-    proc = ffmpeg(resolve(args.quelle), args.fps, args.rand, args.schleife, args.farbe, args.kontrast)
+    proc = ffmpeg(resolve(args.quelle), args.fps, "rand" if args.rand else args.modus, args.schleife,
+                  args.farbe, args.kontrast)
     print(f"Sende {args.quelle} an {port.port}, Strg+C zum Beenden")
     step = 1 / args.fps
     t0 = time.monotonic()

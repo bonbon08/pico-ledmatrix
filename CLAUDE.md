@@ -15,9 +15,9 @@ Dazu gehören Demos, eine PC-GUI zum Hochladen und ein 3D-Druck-Gehäuse. Mit de
 
 - `matrix.py`: die gemeinsame Bibliothek. Farben werden immer in 0–255 angegeben. Dazu gehören `set`, `get`, `fill`, `clear`, `show`, `wheel`, `xy` und `buf`, das ist RGB in LED-Ketten-Reihenfolge. `show()` dimmt, korrigiert und rundet per `@micropython.viper` und braucht etwa 8 ms.
 - `demos/*.py`: eine Demo pro Datei, wird als `main.py` auf den Pico geladen. Dateien mit `_` am Anfang sind keine Demos, zum Beispiel `_bild.py`, der Player für eigene Bilder.
-- `tools/gui.py`: Tkinter-GUI. Neue Demos tauchen automatisch auf, Name und Beschreibung kommen aus `NAMES`. Demos, die einen PC-Sender brauchen, stehen in `SENDERS`.
-- `tools/visualizer.py` und `tools/tastatur.py`: PC-Sender. Sie schicken **nur druckbare Zeichen** über USB-Seriell, nie Byte 0x03 (Strg+C), sonst bricht der Pico das Programm ab.
-- `tools/vorschau.py`: rendert eine Demo auf dem PC mit Attrappen für `matrix` und `micropython` als PNG.
+- `tools/gui.py`: Tkinter-GUI für alles (Demos mit Live-Vorschau, Bild/GIF, Video & Bildschirm, OS-Logo, Werkzeuge). Neue Demos tauchen automatisch auf, Name und Beschreibung kommen aus `NAMES`, Hinweise aus `HINTS`. Demos, die einen PC-Sender brauchen, stehen in `SENDERS`. Neue PC-Werkzeuge gehören ebenfalls in die GUI.
+- `tools/visualizer.py`, `tools/tastatur.py`, `tools/video.py`, `tools/bildschirm.py`: PC-Sender. Sie schicken **nur druckbare Zeichen** über USB-Seriell, nie Byte 0x03 (Strg+C), sonst bricht der Pico das Programm ab.
+- `tools/vorschau.py`: rendert eine Demo auf dem PC mit Attrappen für `matrix` und `micropython` als PNG, mit `--live` in Echtzeit als Rohdaten (nutzt die GUI). Demos müssen deshalb auch mit leerem stdin laufen, ohne sich in einer Schleife ohne `sleep_ms` aufzuhängen.
 - `gehaeuse/gehaeuse.scad`: parametrisches OpenSCAD-Gehäuse. `teil = "front" | "deckel" | "lehre"`.
 
 ## Befehle

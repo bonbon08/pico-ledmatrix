@@ -1,4 +1,5 @@
-# Demo: Video. Zeigt ein Video, das der PC (tools/video.py) Bild fuer Bild ueber USB schickt.
+# Demo: Video. Zeigt ein Video oder den Bildschirm, das der PC (tools/video.py oder tools/bildschirm.py)
+# Bild fuer Bild ueber USB schickt.
 # Ohne PC pulsiert ein Play-Symbol. Pro Bild kommt "#", dann 768 Zeichen '0'..'o' (6 Bit je Farbe,
 # zeilenweise RGB) und ein Zeilenende - nur druckbare Zeichen, damit nie ein Strg+C dabei ist.
 import sys, time, select, micropython, array

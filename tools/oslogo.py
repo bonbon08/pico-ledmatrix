@@ -76,7 +76,13 @@ def fastfetch_logo(logo):
     return rows
 
 
-def render(rows):
+def list_logos():
+    """Namen der eingebauten fastfetch-Logos."""
+    out = subprocess.run(["fastfetch", "--list-logos"], capture_output=True, text=True).stdout
+    return [m.group(1) for m in re.finditer(r'^\s*\d+\)\s+"([^"]+)"', out, re.M)]
+
+
+def render(rows, low=LOW, high=HIGH):
     font_path = subprocess.run(["fc-match", "-f", "%{file}", "monospace"], capture_output=True,
                                text=True).stdout or None
     font = ImageFont.truetype(font_path, 40) if font_path else ImageFont.load_default()
@@ -102,7 +108,7 @@ def render(rows):
     for y in range(N):
         for x in range(N):
             p = pix[x, y]
-            f = min(1.0, max(0.0, (max(p) / top - LOW) / (HIGH - LOW)))
+            f = min(1.0, max(0.0, (max(p) / top - low) / (high - low)))
             m = max(p) or 1
             pix[x, y] = tuple(round(c / m * 255 * f) for c in p)
     return small

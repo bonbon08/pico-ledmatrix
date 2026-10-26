@@ -95,8 +95,9 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `tools/tastatur.py` | PC-Seite der Bongo-Katze und der Tipp-Ente: meldet Tastendrücke an den Pico |
 | `tools/oslogo.py` | Holt das Logo von fastfetch, rechnet es auf 16×16 um und lädt es mit der Demo hoch |
 | `tools/video.py` | PC-Seite des Videos: dekodiert mit ffmpeg (Dateien oder Links über yt-dlp) und streamt an den Pico |
-| `tools/vorschau.py` | Vorschaubild einer Demo auf dem PC erzeugen, ohne Pico |
-| `tools/gui.py` | GUI zum Auswählen und Hochladen von Demos und eigenen Bildern/GIFs |
+| `tools/vorschau.py` | Vorschaubild einer Demo auf dem PC erzeugen, ohne Pico; mit `--live` läuft sie in Echtzeit (für die GUI) |
+| `tools/bildschirm.py` | PC-Bildschirm live an den Pico streamen (Wayland über die Bildschirmfreigabe, X11 über ffmpeg) |
+| `tools/gui.py` | GUI für alles: Demos mit Live-Vorschau, Bilder/GIFs, Video und Bildschirm, OS-Logo, Werkzeuge |
 | `demos/_bild.py` | Player für eigene Bilder/GIFs (lädt die GUI zusammen mit `bild.bin` hoch) |
 | `gehaeuse/` | 3D-Druck-Gehäuse (OpenSCAD + STL) |
 
@@ -106,21 +107,28 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 python tools/gui.py
 ```
 
-Benötigt werden `tkinter`, Pillow und pyserial, für den Sound-Visualizer zusätzlich numpy und `parec`. `mpremote` wird verwendet, wenn es installiert ist, sonst über `uvx mpremote` gestartet.
+Alles, was die Werkzeuge in `tools/` können, geht auch über die GUI. Benötigt werden `tkinter`, Pillow und pyserial, je nach Funktion zusätzlich numpy und `parec` (Visualizer), ffmpeg (Video), fastfetch (OS-Logo) sowie python-gobject und gst-plugin-pipewire (Bildschirm unter Wayland). `mpremote` wird verwendet, wenn es installiert ist, sonst über `uvx mpremote` gestartet.
 
-- **Demos:** Links eine Demo auswählen, rechts erscheinen Vorschau und Beschreibung. „Auf die Matrix laden“ oder ein Doppelklick lädt sie hoch, `matrix.py` wird dabei immer mit hochgeladen.
+Oben steht, ob der Pico verbunden ist (grüner Punkt), was gerade auf der Matrix läuft und welcher PC-Sender aktiv ist. Unten steht das Protokoll, es lässt sich ausblenden.
+
+- **Demos:** Eine **Live-Vorschau** lässt die gewählte Demo animiert auf dem PC laufen (`tools/vorschau.py --live`). Über der Liste gibt es eine Suche. „Auf die Matrix laden“, ein Doppelklick oder Enter lädt die Demo hoch, `matrix.py` wird dabei immer mitgeschickt.
   - Bei der **Uhr** übernimmt die GUI die PC-Zeit und startet ohne Reset.
-  - Beim **Sound-Visualizer** startet die GUI anschließend `tools/visualizer.py`. „Visualizer stoppen“ beendet es, ebenso das nächste Hochladen.
-- **Eigenes Bild / GIF:** PNG, GIF, JPG, BMP oder WebP öffnen. Die Vorschau zeigt das Ergebnis in 16×16, GIFs animiert.
+  - Beim **Sound-Visualizer**, der **Bongo-Katze** und der **Tipp-Ente** startet danach der passende PC-Sender. Fehlt das Recht, die Tastatur mitzulesen, steht der nötige Befehl zum Kopieren gleich dabei.
+- **Bild / GIF:** PNG, GIF, JPG, BMP oder WebP öffnen. Die Vorschau zeigt das Ergebnis in 16×16, GIFs animiert.
   - *Einpassen* lässt schwarze Ränder, *Zuschneiden* füllt die ganze Fläche, *Strecken* verzerrt.
-  - *Helligkeit anheben* streckt alle Bilder mit demselben Faktor so, dass der hellste Wert 255 ist. Dunkle Bilder sind auf der gedimmten Matrix sonst kaum zu sehen.
+  - *Helligkeit anheben* streckt alle Bilder mit demselben Faktor so, dass der hellste Wert 255 ist.
   - *Scharf skalieren* ist für Pixel-Art gedacht und wird bei Bildern bis 32 Pixel automatisch eingeschaltet.
-  - *GIF-Tempo* von 0,25× bis 3×.
-  - Hochgeladen werden höchstens 400 Bilder, das sind etwa 300 KB im Flash.
-- **Matrix ausschalten:** LEDs aus und `main.py` löschen. Danach startet beim Einstecken nichts mehr.
+  - *GIF-Tempo* von 0,25× bis 3×. Hochgeladen werden höchstens 400 Bilder (etwa 300 KB im Flash).
+- **Video & Bildschirm:** Quelle wählen (Videodatei, Link oder den Bildschirm dieses PCs), dazu Zuschnitt, Bilder pro Sekunde, Farbe und Kontrast, beim Bildschirm auch einen Ausschnitt. „Starten“ lädt bei Bedarf den Empfänger (`demos/video.py`) und startet `tools/video.py` bzw. `tools/bildschirm.py`. Daneben steht die Bildrate, die der Pico meldet.
+- **OS-Logo:** Logo wählen (Standard: dieser PC, sonst jeder Name aus `fastfetch --list-logos`), Kontrast mit zwei Reglern einstellen, das Ergebnis in 16×16 ansehen und mit der Demo hochladen.
+- **Werkzeuge:**
+  - Testbild (`tools/testbild.py`), Neustart und Ausschalten (LEDs aus, `main.py` löschen).
+  - Uhr stellen.
+  - Audioquelle für den Visualizer.
+  - Prüfung der Tastatur-Rechte.
+  - Dateien und freier Speicher auf dem Pico.
 
-Neue Demos in `demos/` erscheinen automatisch in der Liste. Der Name kommt aus `NAMES` in `tools/gui.py`, sonst aus dem Kopfkommentar der Demo (`# Demo: Name. Beschreibung`). Das Vorschaubild ist `bilder/<demo>.png`.
-Dateien, die mit `_` beginnen, sind keine Demos.
+Neue Demos in `demos/` erscheinen automatisch in der Liste. Der Name kommt aus `NAMES` in `tools/gui.py`, sonst aus dem Kopfkommentar der Demo (`# Demo: Name. Beschreibung`). Hinweise unter der Beschreibung stehen in `HINTS`. Dateien, die mit `_` beginnen, sind keine Demos.
 
 ### Format von `bild.bin`
 
@@ -180,11 +188,21 @@ Die GUI macht das beim Hochladen der Demo automatisch.
 ```bash
 uvx mpremote cp demos/video.py :main.py + reset
 python tools/video.py film.mp4                       # einmal abspielen
-python tools/video.py film.mp4 --schleife --rand     # endlos, ganzes Bild mit Rand
+python tools/video.py film.mp4 --schleife --modus rand   # endlos, ganzes Bild mit Rand
 python tools/video.py "https://..." --fps 30         # Link, 30 Bilder/s
 ```
 
 Pro Bild gehen `#`, 768 Zeichen `0`–`o` (6 Bit je Farbe) und ein Zeilenende zum Pico, also nur druckbare Zeichen. Getestet sind 50 Bilder/s ohne Aussetzer. Kommt der Pico nicht hinterher, lässt der Sender Bilder aus, damit das Video im Takt bleibt. Der Pico meldet alle 5 Sekunden seine Bildrate zurück.
+
+### Bildschirm
+
+`tools/bildschirm.py` zeigt den PC-Bildschirm live auf der Matrix. Auf dem Pico läuft dafür derselbe Empfänger wie beim Video (`demos/video.py`). Unter Wayland läuft die Aufnahme über die Bildschirmfreigabe des Desktops (xdg-desktop-portal und PipeWire). Beim ersten Mal fragt der Desktop in einem Dialog, welcher Bildschirm geteilt werden soll. Die Erlaubnis wird in `~/.cache/ledmatrix-bildschirm.token` gespeichert. Unter X11 nimmt ffmpeg auf.
+
+```bash
+python tools/bildschirm.py                        # ganzer Bildschirm, oben/unten schwarzer Rand
+python tools/bildschirm.py --bereich 0.25,0.25,0.5,0.5   # nur die Mitte (x, y, Breite, Höhe)
+python tools/bildschirm.py --neu                  # Bildschirm neu auswählen
+```
 
 ### Bongo-Katze
 
@@ -262,7 +280,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **OS-Logo:** `HOLD` ist die Standzeit, `GLINT_EVERY` der Abstand der Glanzstreifen, `BUILD_SPEED` das Tempo von Aufbau und Zerfall. In `tools/oslogo.py` regeln `LOW` und `HIGH` den Kontrast beim Umrechnen (höheres `LOW` = weniger schwache Randpixel), `ANSI` die Farben.
 - **Elemente:** In `POUR` stehen die Gieß-Phasen (Material, alle wie viele Bilder ein Pixel, Gewicht). `FULL` ist die Füllung, ab der der Boden aufgeht, `KEEP` wie viel dabei übrig bleibt. Farben in `PAL`, Flackern und Körnung in `VAR`. Die Regeln (wer sinkt durch wen, Reaktionen) stehen in `step()`, die Dichten in `MD` und `TD`.
 - **KI-Kern:** `SPIN` ist das Drehtempo, `TILT` das Kippen, `RADIUS` die Kugelgröße. `STARE_EVERY` und `STARE` regeln das Anstarren. Farben in `ARMOR`, `SEAM`, `EYE` und `ANGRY`. In `RINGS` lassen sich weitere Ringe eintragen (Neigung, Radius, Tempo, Farbe).
-- **Video:** Am Sender: `--fps`, `--farbe` (Sättigung, Standard 1,4), `--kontrast` (Standard 1,15), `--rand` (ganzes Bild statt Zuschnitt), `--schleife`. In der Demo: `TIMEOUT`, nach wie vielen ms ohne Bild das Play-Symbol erscheint.
+- **Video:** Am Sender: `--fps`, `--farbe` (Sättigung, Standard 1,4), `--kontrast` (Standard 1,15), `--modus` (`zuschneiden`, `rand` oder `strecken`), `--schleife`. In der Demo: `TIMEOUT`, nach wie vielen ms ohne Bild das Play-Symbol erscheint.
 - **Feuer:** `COOL` bestimmt die Flammenhöhe (größer = niedriger). `EMBER` ist die Häufigkeit der Funken, `WIND` die Häufigkeit von Windwechseln.
 - **Game of Life:** `FRAMES` und `FRAME_MS` bestimmen das Tempo (eine Generation = `FRAMES × FRAME_MS`, also ca. 190 ms). `DENSITY` ist die Startdichte beim Zufallsstart.
 - **Snake:** `STEP_MS` ist die Zeit pro Schritt. Eine komplette Runde dauert bei 80 ms etwa 15 Minuten.
