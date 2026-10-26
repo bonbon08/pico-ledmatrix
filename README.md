@@ -81,6 +81,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/oslogo.py` | Logo des Betriebssystems vom PC (wie bei fastfetch), baut sich funkelnd auf, mit Glanzstreifen; das Logo erzeugt `tools/oslogo.py` ([Vorschau](bilder/oslogo.png)) |
 | `demos/elemente.py` | Physik-Sandkasten: Sand, Wasser, Lava und Samen; Lava + Wasser = Stein + Dampf, Pflanzen wachsen und brennen ([Vorschau](bilder/elemente.png)) |
 | `demos/kikern.py` | Rotierende 3D-Panzerkugel mit leuchtendem Auge und Ring, starrt ab und zu rot den Betrachter an ([Vorschau](bilder/kikern.png)) |
+| `demos/video.py` | Video vom PC abspielen (16×16, bis 50 Bilder/s), braucht `tools/video.py`; ohne PC pulsiert ein Play-Symbol ([Vorschau](bilder/video.png)) |
 | `demos/roboter.py` | Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft ([Vorschau](bilder/roboter.png)) |
 | `demos/kopfstein.py` | Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt ([Vorschau](bilder/kopfstein.png)) |
 | `demos/matrixcode.py` | Grüner Matrix-Code-Regen mit flackernden Zeichen ([Vorschau](bilder/matrixcode.png)) |
@@ -93,6 +94,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `tools/visualizer.py` | PC-Seite des Sound-Visualizers |
 | `tools/tastatur.py` | PC-Seite der Bongo-Katze und der Tipp-Ente: meldet Tastendrücke an den Pico |
 | `tools/oslogo.py` | Holt das Logo von fastfetch, rechnet es auf 16×16 um und lädt es mit der Demo hoch |
+| `tools/video.py` | PC-Seite des Videos: dekodiert mit ffmpeg (Dateien oder Links über yt-dlp) und streamt an den Pico |
 | `tools/vorschau.py` | Vorschaubild einer Demo auf dem PC erzeugen, ohne Pico |
 | `tools/gui.py` | GUI zum Auswählen und Hochladen von Demos und eigenen Bildern/GIFs |
 | `demos/_bild.py` | Player für eigene Bilder/GIFs (lädt die GUI zusammen mit `bild.bin` hoch) |
@@ -171,6 +173,19 @@ python tools/oslogo.py --png /tmp/logo.png      # nur ansehen, nichts hochladen
 
 Die GUI macht das beim Hochladen der Demo automatisch.
 
+### Video
+
+`tools/video.py` dekodiert ein Video mit ffmpeg, schneidet es quadratisch zu, verkleinert es auf 16×16 und hebt Farbe und Kontrast etwas an. Danach streamt es das Video Bild für Bild an den Pico. Links von Videoseiten löst es mit yt-dlp auf.
+
+```bash
+uvx mpremote cp demos/video.py :main.py + reset
+python tools/video.py film.mp4                       # einmal abspielen
+python tools/video.py film.mp4 --schleife --rand     # endlos, ganzes Bild mit Rand
+python tools/video.py "https://..." --fps 30         # Link, 30 Bilder/s
+```
+
+Pro Bild gehen `#`, 768 Zeichen `0`–`o` (6 Bit je Farbe) und ein Zeilenende zum Pico, also nur druckbare Zeichen. Getestet sind 50 Bilder/s ohne Aussetzer. Kommt der Pico nicht hinterher, lässt der Sender Bilder aus, damit das Video im Takt bleibt. Der Pico meldet alle 5 Sekunden seine Bildrate zurück.
+
 ### Bongo-Katze
 
 Die Katze haut bei jedem Tastendruck am PC auf ihre Tastatur, abwechselnd mit der linken und der rechten Pfote. Ohne PC trommelt sie im Demo-Modus von selbst, nach 30 Sekunden ohne Tastendruck schläft sie ein.
@@ -247,6 +262,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **OS-Logo:** `HOLD` ist die Standzeit, `GLINT_EVERY` der Abstand der Glanzstreifen, `BUILD_SPEED` das Tempo von Aufbau und Zerfall. In `tools/oslogo.py` regeln `LOW` und `HIGH` den Kontrast beim Umrechnen (höheres `LOW` = weniger schwache Randpixel), `ANSI` die Farben.
 - **Elemente:** In `POUR` stehen die Gieß-Phasen (Material, alle wie viele Bilder ein Pixel, Gewicht). `FULL` ist die Füllung, ab der der Boden aufgeht, `KEEP` wie viel dabei übrig bleibt. Farben in `PAL`, Flackern und Körnung in `VAR`. Die Regeln (wer sinkt durch wen, Reaktionen) stehen in `step()`, die Dichten in `MD` und `TD`.
 - **KI-Kern:** `SPIN` ist das Drehtempo, `TILT` das Kippen, `RADIUS` die Kugelgröße. `STARE_EVERY` und `STARE` regeln das Anstarren. Farben in `ARMOR`, `SEAM`, `EYE` und `ANGRY`. In `RINGS` lassen sich weitere Ringe eintragen (Neigung, Radius, Tempo, Farbe).
+- **Video:** Am Sender: `--fps`, `--farbe` (Sättigung, Standard 1,4), `--kontrast` (Standard 1,15), `--rand` (ganzes Bild statt Zuschnitt), `--schleife`. In der Demo: `TIMEOUT`, nach wie vielen ms ohne Bild das Play-Symbol erscheint.
 - **Feuer:** `COOL` bestimmt die Flammenhöhe (größer = niedriger). `EMBER` ist die Häufigkeit der Funken, `WIND` die Häufigkeit von Windwechseln.
 - **Game of Life:** `FRAMES` und `FRAME_MS` bestimmen das Tempo (eine Generation = `FRAMES × FRAME_MS`, also ca. 190 ms). `DENSITY` ist die Startdichte beim Zufallsstart.
 - **Snake:** `STEP_MS` ist die Zeit pro Schritt. Eine komplette Runde dauert bei 80 ms etwa 15 Minuten.

@@ -29,7 +29,8 @@ PLAYER = DEMOS / "_bild.py"
 # Demos, zu denen auf dem PC ein Sender laufen muss
 SENDERS = {"visualizer": ROOT / "tools" / "visualizer.py",
            "bongocat": ROOT / "tools" / "tastatur.py",
-           "ente": ROOT / "tools" / "tastatur.py"}
+           "ente": ROOT / "tools" / "tastatur.py",
+           "video": ROOT / "tools" / "video.py"}
 
 N = 16
 MAX_FRAMES = 400           # 768 Byte je Bild -> ca. 300 KB im Flash des Pico
@@ -55,6 +56,7 @@ NAMES = {
     "oslogo": ("OS-Logo", "Das Logo des Betriebssystems dieses PCs, wie fastfetch es zeigt. Baut sich funkelnd auf, ein Glanzstreifen zieht darüber."),
     "elemente": ("Elemente", "Physik-Sandkasten: Sand rieselt, Wasser fließt, Lava wird an Wasser zu Stein und Dampf, Pflanzen wachsen und brennen ab."),
     "kikern": ("KI-Kern", "Rotierende 3D-Panzerkugel mit leuchtendem Auge und kreisendem Ring. Ab und zu hält sie an und starrt dich mit rotem Auge an."),
+    "video": ("Video", "Spielt ein Video vom PC auf der Matrix ab, zugeschnitten auf 16×16 mit bis zu 50 Bildern pro Sekunde."),
     "roboter": ("Roboter", "Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft."),
     "erdblock": ("Erdblock", "Rotierender 3D-Erdblock im Minecraft-Stil."),
     "kopfstein": ("Pflasterstein", "Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt."),
@@ -214,6 +216,10 @@ class App(tk.Tk):
             extra = "\n\nDie Uhrzeit wird beim Hochladen vom PC übernommen."
         elif d["path"].stem == "visualizer":
             extra = "\n\nNach dem Hochladen startet die GUI das Senden des PC-Tons automatisch."
+        elif d["path"].stem == "video":
+            extra = ("\n\nBeim Hochladen fragt die GUI nach einer Videodatei und spielt sie danach in "
+                     "Schleife ab (braucht ffmpeg). Links von Videoseiten gehen über die Kommandozeile: "
+                     "python tools/video.py \"https://...\"")
         elif d["path"].stem == "oslogo":
             extra = "\n\nBeim Hochladen wird das Logo mit fastfetch von diesem PC geholt und mitgeschickt."
         elif d["path"].stem in ("bongocat", "ente"):
@@ -234,6 +240,13 @@ class App(tk.Tk):
         if not d or not self.check_ready():
             return
         stem = d["path"].stem
+        extra = ()
+        if stem == "video":
+            path = filedialog.askopenfilename(title="Video auswählen", filetypes=[
+                ("Videos", "*.mp4 *.mkv *.webm *.avi *.mov *.gif"), ("Alle Dateien", "*")])
+            if not path:
+                return
+            extra = (path, "--schleife")
         cmd = ["cp", str(MATRIX), ":matrix.py", "+", "cp", str(d["path"]), ":main.py", "+"]
         if stem == "oslogo":
             logo = Path(tempfile.mkdtemp(prefix="ledmatrix-")) / "oslogo.bin"
@@ -248,7 +261,7 @@ class App(tk.Tk):
             cmd += ["rtc", "--set", "+", "exec", "--no-follow", "import main"]
         else:
             cmd += ["reset"]
-        after = (lambda: self.start_sender(SENDERS[stem])) if stem in SENDERS else None
+        after = (lambda: self.start_sender(SENDERS[stem], extra)) if stem in SENDERS else None
         self.run(cmd, f"Lade „{d['title']}“ …", f"„{d['title']}“ läuft", after)
 
     # ---------- Eigenes Bild ----------
@@ -436,7 +449,7 @@ class App(tk.Tk):
         self.run(["exec", code], "Schalte aus …", "Matrix aus (startet beim Einstecken nichts mehr)")
 
     # ---------- PC-Sender (Sound-Visualizer, Bongo-Katze) ----------
-    def start_sender(self, script):
+    def start_sender(self, script, extra=()):
         port = self.port_device()   # Tk-Variablen nur im Haupt-Thread lesen
 
         def go():
@@ -446,7 +459,7 @@ class App(tk.Tk):
             while not Path(port).exists() and time.time() - t < 10:
                 time.sleep(0.3)
             time.sleep(1.0)
-            self.sender = subprocess.Popen([sys.executable, "-u", str(script), "--port", port],
+            self.sender = subprocess.Popen([sys.executable, "-u", str(script), "--port", port, *extra],
                                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             self.log_q.put(f"PC-Sender {script.name} gestartet")
             for line in self.sender.stdout:
