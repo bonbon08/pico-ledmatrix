@@ -80,6 +80,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/terminal.py` | Altes Bernstein-Terminal: Text tippt sich Zeile für Zeile, dazu Pixel-Symbole und ein hüpfender Pegel ([Vorschau](bilder/terminal.png)) |
 | `demos/oslogo.py` | Logo des Betriebssystems vom PC (wie bei fastfetch), baut sich funkelnd auf, mit Glanzstreifen; das Logo erzeugt `tools/oslogo.py` ([Vorschau](bilder/oslogo.png)) |
 | `demos/elemente.py` | Physik-Sandkasten: Sand, Wasser, Lava und Samen; Lava + Wasser = Stein + Dampf, Pflanzen wachsen und brennen ([Vorschau](bilder/elemente.png)) |
+| `demos/kikern.py` | Rotierende 3D-Panzerkugel mit leuchtendem Auge und Ring, starrt ab und zu rot den Betrachter an ([Vorschau](bilder/kikern.png)) |
 | `demos/roboter.py` | Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft ([Vorschau](bilder/roboter.png)) |
 | `demos/kopfstein.py` | Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt ([Vorschau](bilder/kopfstein.png)) |
 | `demos/matrixcode.py` | Grüner Matrix-Code-Regen mit flackernden Zeichen ([Vorschau](bilder/matrixcode.png)) |
@@ -245,6 +246,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Terminal:** `TYPE_FRAMES` ist das Tipptempo, `LINE_PAUSE` und `VERSE_PAUSE` die Pausen nach Zeile und Strophe, `VERSE_LINES` die Zeilen pro Strophe. Die Symbole stehen in `ICONS` (6×6), die Farben in `AMBER`, `FRESH` und `FRAME`.
 - **OS-Logo:** `HOLD` ist die Standzeit, `GLINT_EVERY` der Abstand der Glanzstreifen, `BUILD_SPEED` das Tempo von Aufbau und Zerfall. In `tools/oslogo.py` regeln `LOW` und `HIGH` den Kontrast beim Umrechnen (höheres `LOW` = weniger schwache Randpixel), `ANSI` die Farben.
 - **Elemente:** In `POUR` stehen die Gieß-Phasen (Material, alle wie viele Bilder ein Pixel, Gewicht). `FULL` ist die Füllung, ab der der Boden aufgeht, `KEEP` wie viel dabei übrig bleibt. Farben in `PAL`, Flackern und Körnung in `VAR`. Die Regeln (wer sinkt durch wen, Reaktionen) stehen in `step()`, die Dichten in `MD` und `TD`.
+- **KI-Kern:** `SPIN` ist das Drehtempo, `TILT` das Kippen, `RADIUS` die Kugelgröße. `STARE_EVERY` und `STARE` regeln das Anstarren. Farben in `ARMOR`, `SEAM`, `EYE` und `ANGRY`. In `RINGS` lassen sich weitere Ringe eintragen (Neigung, Radius, Tempo, Farbe).
 - **Feuer:** `COOL` bestimmt die Flammenhöhe (größer = niedriger). `EMBER` ist die Häufigkeit der Funken, `WIND` die Häufigkeit von Windwechseln.
 - **Game of Life:** `FRAMES` und `FRAME_MS` bestimmen das Tempo (eine Generation = `FRAMES × FRAME_MS`, also ca. 190 ms). `DENSITY` ist die Startdichte beim Zufallsstart.
 - **Snake:** `STEP_MS` ist die Zeit pro Schritt. Eine komplette Runde dauert bei 80 ms etwa 15 Minuten.
