@@ -76,6 +76,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 | `demos/visualizer.py` | Sound-Visualizer: 16 Frequenzbalken vom PC-Ton, braucht `tools/visualizer.py` auf dem PC |
 | `demos/bongocat.py` | Bongo-Katze, die bei jedem Tastendruck am PC auf ihre Tastatur haut, braucht `tools/tastatur.py` ([Vorschau](bilder/bongocat.png)) |
 | `demos/ente.py` | Tipp-Ente, die bei jedem Tastendruck am PC mit dem Schnabel auf ihre Tastatur pickt, braucht `tools/tastatur.py` ([Vorschau](bilder/ente.png)) |
+| `demos/mampf.py` | Mampf, ein runder Knubbel, läuft über die Wiese, saugt herabfallendes Essen ein, kaut, rülpst Sterne und glüht nach Peperoni ([Vorschau](bilder/mampf.png)) |
 | `demos/roboter.py` | Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft ([Vorschau](bilder/roboter.png)) |
 | `demos/kopfstein.py` | Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt ([Vorschau](bilder/kopfstein.png)) |
 | `demos/matrixcode.py` | Grüner Matrix-Code-Regen mit flackernden Zeichen ([Vorschau](bilder/matrixcode.png)) |
@@ -224,6 +225,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Sternhimmel:** `STARS` ist die Anzahl der Sterne, `SHOOT` die Häufigkeit der Sternschnuppen (0,006 = etwa alle 7 Sekunden). Mit `MOON` lässt sich der Mond ein- und ausschalten.
 - **Kirschbaum:** Die Form steht als Pixel-Art in `ART` (B = Blüte, T = Stamm, G = Boden, * = Stern), die Farben in `BLUES`. `PETALS` und `PETAL_RATE` steuern die Blütenblätter.
 - **Tipp-Ente:** Die Ente steht als Pixel-Art in `ART` (Körper) und `HEAD` (vier Kopfhaltungen), die Farben in `COL`. `PECK` ist der Ablauf eines Picks (eine Zahl pro Bild), `SLEEP_AFTER` die Zeit bis zum Einschlafen.
+- **Mampf:** `SPAWN` ist die Häufigkeit des Essens, `MAX_ITEMS` die Höchstzahl gleichzeitig. Das Essen steht in `ITEMS` als 3×3-Pixel-Art mit Gewicht (je höher, desto häufiger). `SPEED` und `HOT_SPEED` sind das Lauftempo, `BURP_AFTER` die Happen bis zum Rülpser. Die Figur steht in `BODY`, `MOUTH` und `FEET`, die Farben in `COL`.
 - **Feuer:** `COOL` bestimmt die Flammenhöhe (größer = niedriger). `EMBER` ist die Häufigkeit der Funken, `WIND` die Häufigkeit von Windwechseln.
 - **Game of Life:** `FRAMES` und `FRAME_MS` bestimmen das Tempo (eine Generation = `FRAMES × FRAME_MS`, also ca. 190 ms). `DENSITY` ist die Startdichte beim Zufallsstart.
 - **Snake:** `STEP_MS` ist die Zeit pro Schritt. Eine komplette Runde dauert bei 80 ms etwa 15 Minuten.

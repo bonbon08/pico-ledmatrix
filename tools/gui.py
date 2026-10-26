@@ -50,6 +50,7 @@ NAMES = {
     "visualizer": ("Sound-Visualizer", "16 Frequenzbalken zu dem Ton, der gerade auf dem PC läuft."),
     "bongocat": ("Bongo-Katze", "Haut bei jedem Tastendruck am PC auf ihre Tastatur. Ohne PC trommelt sie von selbst, nach 30 s Ruhe schläft sie ein."),
     "ente": ("Tipp-Ente", "Pickt bei jedem Tastendruck am PC mit dem Schnabel auf ihre Tastatur. Ohne PC pickt sie von selbst, nach 30 s Ruhe schläft sie ein."),
+    "mampf": ("Mampf", "Ein runder Knubbel läuft über die Wiese, saugt herabfallendes Essen ein, kaut, rülpst Sterne und rennt nach einer Peperoni rot glühend herum."),
     "roboter": ("Roboter", "Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft."),
     "erdblock": ("Erdblock", "Rotierender 3D-Erdblock im Minecraft-Stil."),
     "kopfstein": ("Pflasterstein", "Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt."),
