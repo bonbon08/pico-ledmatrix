@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tastatur-Sender fuer die Bongo-Katze: meldet dem Pico jeden Tastendruck am PC.
+"""Tastatur-Sender fuer Bongo-Katze und Tipp-Ente: meldet dem Pico jeden Tastendruck am PC.
 
 Gesendet wird pro Tastendruck nur ein "k" (nie, welche Taste) und jede Sekunde ein "." als
 Lebenszeichen. Gelesen wird direkt aus /dev/input, das funktioniert auch unter Wayland und

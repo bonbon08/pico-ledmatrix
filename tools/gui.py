@@ -28,7 +28,8 @@ MATRIX = ROOT / "matrix.py"
 PLAYER = DEMOS / "_bild.py"
 # Demos, zu denen auf dem PC ein Sender laufen muss
 SENDERS = {"visualizer": ROOT / "tools" / "visualizer.py",
-           "bongocat": ROOT / "tools" / "tastatur.py"}
+           "bongocat": ROOT / "tools" / "tastatur.py",
+           "ente": ROOT / "tools" / "tastatur.py"}
 
 N = 16
 MAX_FRAMES = 400           # 768 Byte je Bild -> ca. 300 KB im Flash des Pico
@@ -48,6 +49,7 @@ NAMES = {
     "uhr": ("Uhr", "Oben Stunden, unten Minuten, der Rand zeigt als Ring die Sekunden."),
     "visualizer": ("Sound-Visualizer", "16 Frequenzbalken zu dem Ton, der gerade auf dem PC läuft."),
     "bongocat": ("Bongo-Katze", "Haut bei jedem Tastendruck am PC auf ihre Tastatur. Ohne PC trommelt sie von selbst, nach 30 s Ruhe schläft sie ein."),
+    "ente": ("Tipp-Ente", "Pickt bei jedem Tastendruck am PC mit dem Schnabel auf ihre Tastatur. Ohne PC pickt sie von selbst, nach 30 s Ruhe schläft sie ein."),
     "roboter": ("Roboter", "Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft."),
     "erdblock": ("Erdblock", "Rotierender 3D-Erdblock im Minecraft-Stil."),
     "kopfstein": ("Pflasterstein", "Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt."),
@@ -207,7 +209,7 @@ class App(tk.Tk):
             extra = "\n\nDie Uhrzeit wird beim Hochladen vom PC übernommen."
         elif d["path"].stem == "visualizer":
             extra = "\n\nNach dem Hochladen startet die GUI das Senden des PC-Tons automatisch."
-        elif d["path"].stem == "bongocat":
+        elif d["path"].stem in ("bongocat", "ente"):
             extra = ("\n\nNach dem Hochladen meldet die GUI jeden Tastendruck an den Pico (nur dass, nie welche "
                      "Taste). Dafür muss dein Benutzer in der Gruppe „input“ sein: "
                      "sudo usermod -aG input $USER, danach ab- und wieder anmelden.")
