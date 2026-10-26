@@ -1,4 +1,4 @@
-# Demo: Zufaellige Tetris-Bloecke fallen herunter und stapeln sich.
+# Demo: Fallende Bloecke. Zufaellige Steine aus je vier Pixeln fallen herunter und stapeln sich.
 # Volle Reihen blinken und verschwinden. Ist der Stapel oben angekommen,
 # rutscht alles nach unten raus und es geht von vorne los.
 import time, random

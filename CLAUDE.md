@@ -59,4 +59,8 @@ Der Benutzer sieht die Matrix, Claude nicht. Nie behaupten, etwas „sieht gut a
 
 ## Git
 
-Commits auf Deutsch, kurze Betreffzeile („Demo: …“, „Gehäuse: …“). Remote: privates GitHub-Repo `bonbon08/pico-ledmatrix`, Branch `main`.
+Commits auf Deutsch, kurze Betreffzeile („Demo: …“, „Gehäuse: …“). Remote: GitHub-Repo `bonbon08/pico-ledmatrix`, Branch `main`, zur Veröffentlichung vorbereitet.
+
+- Lizenz MIT, Inhaber „bonbon“ (`LICENSE`). Keine echten Namen, Pfade unter `/home/…` oder andere persönliche Daten in Dateien schreiben.
+- Keine Markennamen in Datei- oder Demonamen (deshalb heißt die Tetris-artige Demo `bloecke.py`). „Im Stil von …“ in Beschreibungen ist in Ordnung.
+- Größere Änderungen an Aufbau, Protokollen oder Messwerten auch in `docs/technischer-bericht.md` nachtragen.

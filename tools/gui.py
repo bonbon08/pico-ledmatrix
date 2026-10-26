@@ -73,7 +73,7 @@ NAMES = {
     "roboter": ("Roboter", "Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft."),
     "erdblock": ("Erdblock", "Rotierender 3D-Erdblock im Minecraft-Stil."),
     "kopfstein": ("Pflasterstein", "Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt."),
-    "tetris": ("Fallende Blöcke", "Zufällige Steine fallen und stapeln sich, volle Reihen verschwinden."),
+    "bloecke": ("Fallende Blöcke", "Zufällige Steine fallen und stapeln sich, volle Reihen verschwinden."),
     "snake": ("Snake", "Snake spielt von alleine und füllt meist das ganze Feld."),
     "gameoflife": ("Game of Life", "Conways Spiel des Lebens mit Überblenden und Farbe nach Zellalter."),
     "shooter": ("Ego-Shooter", "90er-Ego-Shooter, der sich selbst spielt: Labyrinth, Schleimmonster, Mündungsfeuer."),

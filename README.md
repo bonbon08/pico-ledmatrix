@@ -1,7 +1,34 @@
 # Pico LED-Matrix 16×16
 
-Regenbogen-Animation für vier WS2812B-8×8-Matrizen (WS2812B-64) an einem Raspberry Pi Pico mit MicroPython.
-Die vier Matrizen bilden zusammen eine Fläche von 16×16 Pixeln (256 LEDs). Sie sind so gedimmt, dass der Pico sie direkt über USB versorgen kann.
+Vier günstige WS2812B-8×8-Matrizen an einem Raspberry Pi Pico, zusammen eine Fläche von 16×16 Pixeln, versorgt nur über USB.
+Dazu gehören 26 Animationen in MicroPython, eine PC-Oberfläche zum Hochladen und Streamen und ein Gehäuse zum 3D-Drucken.
+
+![Alle Demos auf einen Blick (PC-Vorschau)](bilder/uebersicht.png)
+
+*Die Bilder sind PC-Vorschauen von `tools/vorschau.py`, keine Fotos der echten Matrix.*
+
+**Was es kann**
+
+- **26 Demos**, die ohne PC laufen: Feuer, Feuerwerk, Aquarium, Uhr, Game of Life, ein Physik-Sandkasten, ein Raycasting-Shooter, zwei Autorennen, rotierende 3D-Blöcke und mehr.
+- **Mit dem PC:** Sound-Visualizer, Video und Bildschirm live, eigene Bilder und GIFs, eine Bongo-Katze und eine Ente, die bei jedem Tastendruck mittippen.
+- **Eine GUI** (`tools/gui.py`) für alles, mit Live-Vorschau jeder Demo auf dem PC.
+- **Kein Netzteil nötig:** `matrix.py` dimmt auf etwa 6 % und begrenzt den Gesamtstrom, so reichen die 500 mA eines USB-Ports.
+- **Parametrisches Gehäuse** in OpenSCAD mit Pixelraster und Diffusor.
+
+**Schnellstart**
+
+```bash
+# MicroPython auf den Pico flashen (https://micropython.org/download/RPI_PICO/), dann:
+uvx mpremote cp matrix.py :matrix.py + cp demos/feuer.py :main.py + reset
+# oder alles über die GUI (braucht Python 3 mit tkinter, Pillow, pyserial):
+python tools/gui.py
+```
+
+**Weitere Dokumentation**
+
+- [Technischer Bericht](docs/technischer-bericht.md): Aufbau, Stromversorgung, Bildpipeline, Protokolle, Leistung, offene Punkte
+- [Gehäuse](gehaeuse/README.md): Drucken, Zusammenbau, LED-Abstand ausmessen
+- Diese Datei: Hardware, alle Demos, GUI, Werkzeuge und Einstellungen
 
 ## Hardware
 
@@ -65,7 +92,7 @@ Das ist etwa die Grenze eines USB-2.0-Ports. Gemessen wurde VSYS über ADC3 (GP2
 |---|---|
 | `matrix.py` | Gemeinsame Bibliothek: Koordinaten, Helligkeit, Helligkeitsausgleich, Strombremse |
 | `demos/regenbogen.py` | Regenbogen-Ringe von der Mitte nach außen |
-| `demos/tetris.py` | Zufällige Tetris-Steine fallen und stapeln sich, volle Reihen verschwinden |
+| `demos/bloecke.py` | Fallende Blöcke: zufällige Steine aus je vier Pixeln stapeln sich, volle Reihen verschwinden ([Vorschau](bilder/bloecke.png)) |
 | `demos/snake.py` | Snake, die von alleine spielt und meist das ganze Feld füllt |
 | `demos/gameoflife.py` | Conways Game of Life mit Überblenden und Farbe nach Zellalter |
 | `demos/feuer.py` | Lagerfeuer mit Flammenzungen, Wind und aufsteigenden Funken |
@@ -145,7 +172,7 @@ Zuerst einmal die Bibliothek hochladen, dann die gewünschte Demo als `main.py`:
 
 ```bash
 uvx mpremote cp matrix.py :matrix.py
-uvx mpremote cp demos/tetris.py :main.py + reset
+uvx mpremote cp demos/regenbogen.py :main.py + reset
 ```
 
 `main.py` startet automatisch beim Einschalten. Der Treiber `neopixel` ist in MicroPython für den RP2040 schon enthalten.
@@ -287,7 +314,7 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 - **Feuer:** `COOL` bestimmt die Flammenhöhe (größer = niedriger). `EMBER` ist die Häufigkeit der Funken, `WIND` die Häufigkeit von Windwechseln.
 - **Game of Life:** `FRAMES` und `FRAME_MS` bestimmen das Tempo (eine Generation = `FRAMES × FRAME_MS`, also ca. 190 ms). `DENSITY` ist die Startdichte beim Zufallsstart.
 - **Snake:** `STEP_MS` ist die Zeit pro Schritt. Eine komplette Runde dauert bei 80 ms etwa 15 Minuten.
-- **Tetris:** `FALL_MS` ist die Fallgeschwindigkeit. `SMART` ist der Anteil der Steine, die gut gelegt werden. Je höher der Wert, desto mehr Reihen werden voll.
+- **Fallende Blöcke:** `FALL_MS` ist die Fallgeschwindigkeit. `SMART` ist der Anteil der Steine, die gut gelegt werden. Je höher der Wert, desto mehr Reihen werden voll.
 
 ## Fehlersuche
 
@@ -298,3 +325,9 @@ Das Testbild bleibt nur bis zum nächsten Reset. Danach startet wieder `main.py`
 ## Gehäuse
 
 Ein Gehäuse zum 3D-Drucken (Rahmen mit Pixelraster und Diffusor, Deckel mit Pico-Halter) liegt in [`gehaeuse/`](gehaeuse/README.md).
+
+## Lizenz
+
+[MIT](LICENSE), © 2026 bonbon. Das gilt für Code, Gehäuse-Dateien und Bilder in diesem Repository.
+
+Einige Demos sind an bekannte Spielgenres angelehnt („im Minecraft-Stil“, Raycasting-Shooter, fallende Blöcke). Grafik, Levels und Namen sind selbst gemacht, Texturen werden im Code erzeugt. Das Projekt hat nichts mit den Inhabern dieser Spiele oder Marken zu tun. Die OS-Logos erzeugt `fastfetch` auf dem eigenen PC, sie sind nicht Teil des Codes. Das Vorschaubild `bilder/oslogo.png` (und die Kachel in `bilder/uebersicht.png`) zeigt das Arch-Linux-Logo. Es gehört dem Arch-Linux-Projekt und fällt nicht unter die MIT-Lizenz.

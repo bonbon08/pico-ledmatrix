@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .venv/
 oslogo.bin
+bild.bin
+.claude/settings.local.json
