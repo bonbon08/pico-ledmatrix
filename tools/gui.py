@@ -53,6 +53,7 @@ NAMES = {
     "mampf": ("Mampf", "Ein runder Knubbel läuft über die Wiese, saugt herabfallendes Essen ein, kaut, rülpst Sterne und rennt nach einer Peperoni rot glühend herum."),
     "terminal": ("Terminal", "Altes Bernstein-Terminal: links tippt sich Text Zeile für Zeile, rechts drucken sich Pixel-Symbole und ein Pegel hüpft im Takt."),
     "oslogo": ("OS-Logo", "Das Logo des Betriebssystems dieses PCs, wie fastfetch es zeigt. Baut sich funkelnd auf, ein Glanzstreifen zieht darüber."),
+    "elemente": ("Elemente", "Physik-Sandkasten: Sand rieselt, Wasser fließt, Lava wird an Wasser zu Stein und Dampf, Pflanzen wachsen und brennen ab."),
     "roboter": ("Roboter", "Kleiner Roboter, der schaut, blinzelt, winkt, tanzt, sich verliebt und einschläft."),
     "erdblock": ("Erdblock", "Rotierender 3D-Erdblock im Minecraft-Stil."),
     "kopfstein": ("Pflasterstein", "Pflastersteinblock im Minecraft-Stil, der um alle drei Achsen taumelt."),
