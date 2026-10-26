@@ -21,12 +21,12 @@ ART = (
     "................",
     "................",
     "................",
-    "T...............",
-    "TTTDGGG.........",
-    "TTDGGGGG........",
-    "TGGDDGGG........",
-    ".GGGGGG...KKKKKK",
-    "....F.F..KkKkKkK",
+    ".T..............",
+    ".TTTDGGG........",
+    ".TTDGGGGG.......",
+    ".TGGDDGGG.......",
+    "..GGGGGG..KKKKKK",
+    ".....F.F.KkKkKkK",
     "dddddddddddddddd",
     "dddddddddddddddd",
     "dddddddddddddddd",
@@ -37,11 +37,11 @@ HEAD = (
         "................",
         "................",
         "................",
-        "....GG..........",
-        "...GGWG.........",
-        "...GGBGO........",
-        "...GGGG.........",
-        "....GG..........",
+        ".....GG.........",
+        "....GGWG........",
+        "....GGBGO.......",
+        "....GGGG........",
+        ".....GG.........",
     ),
     (   # 1: halb unten
         "................",
@@ -49,12 +49,12 @@ HEAD = (
         "................",
         "................",
         "................",
-        ".......GG.......",
-        "......GGWG......",
-        ".....GGGBGO.....",
-        "......GGGG......",
+        "........GG......",
+        ".......GGWG.....",
+        "......GGGBGO....",
+        ".......GGGG.....",
     ),
-    (   # 2: unten, Schnabel auf der Taste
+    (   # 2: unten, Schnabel auf der Taste, duenner Hals
         "................",
         "................",
         "................",
@@ -62,26 +62,26 @@ HEAD = (
         "................",
         "................",
         "................",
-        ".........GG.....",
-        "......GGGGWG....",
-        "........GGBGO...",
-        "........GGGGO...",
+        "...........GG...",
+        "........GGGGWG..",
+        "..........GGBGO.",
+        "..........GGGGO.",
     ),
     (   # 3: schlafend, Kopf nach hinten gedreht, Auge zu
         "................",
         "................",
         "................",
         "................",
-        "...GG...........",
-        "..GGGG..........",
-        ".ODGGG..........",
-        "..GGGG..........",
+        "....GG..........",
+        "...GGGG.........",
+        "..ODGGG.........",
+        "...GGGG.........",
     ),
 )
 COL = {"G": (60, 190, 40), "T": (255, 175, 95), "D": (165, 95, 20), "F": (255, 110, 20),
        "W": (255, 255, 255), "B": (70, 110, 255), "O": (255, 110, 20),
        "d": (120, 60, 20), "K": (60, 60, 70), "k": (110, 110, 125)}
-KEY_HIT = ((12, 11), (13, 11), (12, 12), (13, 12))   # Taste unter dem Schnabel
+KEY_HIT = ((14, 11), (15, 11), (14, 12), (15, 12))   # Taste unter dem Schnabel
 HIT_COL = (255, 230, 80)
 
 # Tisch, Koerper und Tastatur einmal zeichnen, danach pro Bild nur kopieren
@@ -151,7 +151,7 @@ while True:
     pose = 3 if asleep else (PECK[step] if step < len(PECK) else 0)
     if pose == 2 and PECK[step - 1] != 2:
         for _ in range(3):
-            sparks.append([12.5 + random.uniform(-1, 1), 10.5,
+            sparks.append([14.5 + random.uniform(-1, 1), 10.5,
                            random.uniform(-0.3, 0.3), random.uniform(-0.4, -0.15), 6])
 
     # zeichnen
@@ -172,10 +172,10 @@ while True:
     for x, y, c in POSES[pose]:
         m.set(x, y, c)
     if blink and pose == 0:          # blinzeln: Auge zu
-        m.set(5, 4, COL["G"]); m.set(5, 5, COL["D"])
+        m.set(6, 4, COL["G"]); m.set(6, 5, COL["D"])
     # schlafen: Z steigen auf
     if asleep and frame % 40 == 0:
-        zs.append([4.0, 3.0])
+        zs.append([5.0, 3.0])
     for z in zs:
         z[1] -= 0.06
         z[0] += 0.02
