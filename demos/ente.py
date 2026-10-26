@@ -11,7 +11,8 @@ SLEEP_AFTER = 30000  # ms ohne Tastendruck -> einschlafen
 # Ablauf eines Picks: Kopfhaltung pro Bild (1 = halb unten, 2 = unten auf der Taste)
 PECK = (1, 2, 2, 1)
 
-# Y = Gefieder, w = Fluegel, F = Fuesse, D = Tisch, K/k = Tastatur
+# Stockente nach Vorlage des Benutzers (9x10 Pixel), hier nur der Koerper ohne Kopf und Hals.
+# G = Gefieder, T = Schwanz, D = Fluegellinie, F = Fuesse, d = Tisch, K/k = Tastatur
 ART = (
     "................",
     "................",
@@ -20,35 +21,38 @@ ART = (
     "................",
     "................",
     "................",
-    "Y..YYYY.........",
-    "YYYYYYYY........",
-    "YYYwwwwYY.......",
-    "YYYYwwwYY.......",
-    ".YYYYYYY..KKKKKK",
-    "...F..F..KkKkKkK",
-    "DDDDDDDDDDDDDDDD",
-    "DDDDDDDDDDDDDDDD",
-    "DDDDDDDDDDDDDDDD",
+    "T...............",
+    "TTTDGGG.........",
+    "TTDGGGGG........",
+    "TGGDDGGG........",
+    ".GGGGGG...KKKKKK",
+    "....F.F..KkKkKkK",
+    "dddddddddddddddd",
+    "dddddddddddddddd",
+    "dddddddddddddddd",
 )
-# Kopf und Hals je Haltung, "." = durchsichtig; E = Auge, O = Schnabel
+# Kopf und Hals je Haltung, "." = durchsichtig; W/B = Auge (weiss ueber blau), O = Schnabel
 HEAD = (
-    (   # 0: aufrecht
+    (   # 0: aufrecht, wie in der Vorlage
         "................",
         "................",
-        "...YYY..........",
-        "..YYYEY.........",
-        "..YYYYYOO.......",
-        "...YYYY.........",
-        "....YYY.........",
+        "................",
+        "....GG..........",
+        "...GGWG.........",
+        "...GGBGO........",
+        "...GGGG.........",
+        "....GG..........",
     ),
     (   # 1: halb unten
         "................",
         "................",
         "................",
-        "......YYY.......",
-        ".....YYYEY......",
-        "....YYYYYYOO....",
-        "....YYYYY.......",
+        "................",
+        "................",
+        ".......GG.......",
+        "......GGWG......",
+        ".....GGGBGO.....",
+        "......GGGG......",
     ),
     (   # 2: unten, Schnabel auf der Taste
         "................",
@@ -57,25 +61,26 @@ HEAD = (
         "................",
         "................",
         "................",
-        ".......YYY......",
-        "....YYYYYEY.....",
-        "...YYYYYYYYY....",
-        "...........OO...",
-        "............O...",
+        "................",
+        ".........GG.....",
+        "......GGGGWG....",
+        "........GGBGO...",
+        "........GGGGO...",
     ),
-    (   # 3: schlafend, Kopf auf dem Ruecken
+    (   # 3: schlafend, Kopf nach hinten gedreht, Auge zu
         "................",
         "................",
         "................",
         "................",
-        "................",
-        "................",
-        "..YYY...........",
-        ".YYwYYOO........",   # Auge zu
+        "...GG...........",
+        "..GGGG..........",
+        ".ODGGG..........",
+        "..GGGG..........",
     ),
 )
-COL = {"Y": (255, 205, 30), "w": (235, 150, 0), "F": (255, 100, 0), "E": (20, 20, 40),
-       "O": (255, 95, 0), "D": (120, 60, 20), "K": (60, 60, 70), "k": (110, 110, 125)}
+COL = {"G": (60, 190, 40), "T": (255, 175, 95), "D": (165, 95, 20), "F": (255, 110, 20),
+       "W": (255, 255, 255), "B": (70, 110, 255), "O": (255, 110, 20),
+       "d": (120, 60, 20), "K": (60, 60, 70), "k": (110, 110, 125)}
 KEY_HIT = ((12, 11), (13, 11), (12, 12), (13, 12))   # Taste unter dem Schnabel
 HIT_COL = (255, 230, 80)
 
@@ -156,8 +161,6 @@ while True:
             m.set(x, y, HIT_COL)
     if blink == 0 and random.random() < 0.01:
         blink = 4
-    if blink and pose == 0:
-        m.set(5, 1, COL["Y"])
     blink = max(0, blink - 1)
     if step < len(PECK):
         step += 1
@@ -168,9 +171,11 @@ while True:
     sparks = [s for s in sparks if s[4] > 0]
     for x, y, c in POSES[pose]:
         m.set(x, y, c)
+    if blink and pose == 0:          # blinzeln: Auge zu
+        m.set(5, 4, COL["G"]); m.set(5, 5, COL["D"])
     # schlafen: Z steigen auf
     if asleep and frame % 40 == 0:
-        zs.append([5.0, 5.0])
+        zs.append([4.0, 3.0])
     for z in zs:
         z[1] -= 0.06
         z[0] += 0.02
